@@ -26,3 +26,15 @@ for clasPath in clases:
 
     for currentFile in files:
         count = videotoframes(clasPath + '/' + currentFile, outputDir, "jpg", count)
+
+
+# from Video import Video
+# import matplotlib.pyplot as plt
+#
+# size = 300, 300
+#
+# vid = Video("C:\\Users\\gabri\\Desktop\\big_buck_bunny_720p_5mb.mp4")
+# for img in vid:
+#     plt.imshow(img[:, :, 0], interpolation='nearest')
+#     plt.show()
+#     break

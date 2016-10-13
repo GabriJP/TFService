@@ -1,7 +1,10 @@
+# coding=utf-8
+from __future__ import absolute_import, division, print_function, unicode_literals
 import imageio
 
 
 class Video:
+
     def __init__(self, filename):
         print("Leyendo " + filename)
         self.vid = imageio.get_reader(filename)
@@ -18,6 +21,8 @@ class Video:
             raise StopIteration
         else:
             return self.vid.get_data(self.current)
+
+    next = __next__
 
     def __len__(self):
         return self.len

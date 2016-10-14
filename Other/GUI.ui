@@ -114,140 +114,124 @@
           <property name="title">
            <string>Preferencias</string>
           </property>
-          <widget class="QGroupBox" name="ResizeGroup">
-           <property name="geometry">
-            <rect>
-             <x>17</x>
-             <y>25</y>
-             <width>142</width>
-             <height>63</height>
-            </rect>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="title">
-            <string>Redimensionar a</string>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
-            <item>
-             <widget class="QSpinBox" name="ResizeHeightSpin"/>
-            </item>
-            <item>
-             <widget class="QLabel" name="ResizeXLabel">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>x</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSpinBox" name="ResizeWidthSpin"/>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QGroupBox" name="CropGroup">
-           <property name="geometry">
-            <rect>
-             <x>422</x>
-             <y>25</y>
-             <width>316</width>
-             <height>99</height>
-            </rect>
-           </property>
-           <property name="title">
-            <string>Recortar a</string>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_7">
-            <item>
-             <widget class="QGroupBox" name="CropDimensionGroup">
-              <property name="title">
-               <string>Dimensiones</string>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_5">
-               <item>
-                <widget class="QSpinBox" name="ResizeDimensionHeightSpin"/>
-               </item>
-               <item>
-                <widget class="QLabel" name="ResizeDimensionXLabel">
-                 <property name="text">
-                  <string>x</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSpinBox" name="ResizeDimensionWidthSpin"/>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item>
-             <widget class="QGroupBox" name="CropPositionGroup">
-              <property name="title">
-               <string>Posición</string>
-              </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_6">
-               <item>
-                <widget class="QSpinBox" name="CropPositionXSpin"/>
-               </item>
-               <item>
-                <widget class="QLabel" name="CropPositionXLabel">
-                 <property name="text">
-                  <string>x</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSpinBox" name="CropPositionYSpin"/>
-               </item>
-              </layout>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QGroupBox" name="PercentagesGroup">
-           <property name="geometry">
-            <rect>
-             <x>827</x>
-             <y>25</y>
-             <width>321</width>
-             <height>63</height>
-            </rect>
-           </property>
-           <property name="title">
-            <string>Porcentages</string>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_8">
-            <item>
-             <widget class="QLabel" name="PercentagesTrainingLabel">
-              <property name="text">
-               <string>Entrenamiento:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="PercentagesTrainSpin"/>
-            </item>
-            <item>
-             <widget class="QLabel" name="PercentagesTestLabel">
-              <property name="text">
-               <string>Test:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="PercentagesTestSpin"/>
-            </item>
-           </layout>
-          </widget>
+          <layout class="QHBoxLayout" name="horizontalLayout_9">
+           <item>
+            <widget class="QGroupBox" name="ResizeGroup">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="title">
+              <string>Redimensionar a</string>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+               <widget class="QSpinBox" name="ResizeHeightSpin"/>
+              </item>
+              <item>
+               <widget class="QLabel" name="ResizeXLabel">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>x</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="ResizeWidthSpin"/>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="CropGroup">
+             <property name="title">
+              <string>Recortar a</string>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_7">
+              <item>
+               <widget class="QGroupBox" name="CropDimensionGroup">
+                <property name="title">
+                 <string>Dimensiones</string>
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_5">
+                 <item>
+                  <widget class="QSpinBox" name="ResizeDimensionHeightSpin"/>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="ResizeDimensionXLabel">
+                   <property name="text">
+                    <string>x</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QSpinBox" name="ResizeDimensionWidthSpin"/>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="CropPositionGroup">
+                <property name="title">
+                 <string>Posición</string>
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_6">
+                 <item>
+                  <widget class="QSpinBox" name="CropPositionXSpin"/>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="CropPositionXLabel">
+                   <property name="text">
+                    <string>x</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QSpinBox" name="CropPositionYSpin"/>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="PercentagesGroup">
+             <property name="title">
+              <string>Porcentages</string>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_8">
+              <item>
+               <widget class="QLabel" name="PercentagesTrainingLabel">
+                <property name="text">
+                 <string>Entrenamiento:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="PercentagesTrainSpin"/>
+              </item>
+              <item>
+               <widget class="QLabel" name="PercentagesTestLabel">
+                <property name="text">
+                 <string>Test:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="PercentagesTestSpin"/>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
         <item>

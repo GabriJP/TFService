@@ -8,7 +8,6 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -73,8 +72,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.addWidget(self.ClassesGroup)
         self.PreferencesGroup = QtWidgets.QGroupBox(self.InputTab)
         self.PreferencesGroup.setObjectName("PreferencesGroup")
+        self.horizontalLayout_9 = QtWidgets.QHBoxLayout(self.PreferencesGroup)
+        self.horizontalLayout_9.setObjectName("horizontalLayout_9")
         self.ResizeGroup = QtWidgets.QGroupBox(self.PreferencesGroup)
-        self.ResizeGroup.setGeometry(QtCore.QRect(17, 25, 142, 63))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -97,8 +97,8 @@ class Ui_MainWindow(object):
         self.ResizeWidthSpin = QtWidgets.QSpinBox(self.ResizeGroup)
         self.ResizeWidthSpin.setObjectName("ResizeWidthSpin")
         self.horizontalLayout_4.addWidget(self.ResizeWidthSpin)
+        self.horizontalLayout_9.addWidget(self.ResizeGroup)
         self.CropGroup = QtWidgets.QGroupBox(self.PreferencesGroup)
-        self.CropGroup.setGeometry(QtCore.QRect(422, 25, 316, 99))
         self.CropGroup.setObjectName("CropGroup")
         self.horizontalLayout_7 = QtWidgets.QHBoxLayout(self.CropGroup)
         self.horizontalLayout_7.setObjectName("horizontalLayout_7")
@@ -130,8 +130,8 @@ class Ui_MainWindow(object):
         self.CropPositionYSpin.setObjectName("CropPositionYSpin")
         self.horizontalLayout_6.addWidget(self.CropPositionYSpin)
         self.horizontalLayout_7.addWidget(self.CropPositionGroup)
+        self.horizontalLayout_9.addWidget(self.CropGroup)
         self.PercentagesGroup = QtWidgets.QGroupBox(self.PreferencesGroup)
-        self.PercentagesGroup.setGeometry(QtCore.QRect(827, 25, 321, 63))
         self.PercentagesGroup.setObjectName("PercentagesGroup")
         self.horizontalLayout_8 = QtWidgets.QHBoxLayout(self.PercentagesGroup)
         self.horizontalLayout_8.setObjectName("horizontalLayout_8")
@@ -147,6 +147,7 @@ class Ui_MainWindow(object):
         self.PercentagesTestSpin = QtWidgets.QDoubleSpinBox(self.PercentagesGroup)
         self.PercentagesTestSpin.setObjectName("PercentagesTestSpin")
         self.horizontalLayout_8.addWidget(self.PercentagesTestSpin)
+        self.horizontalLayout_9.addWidget(self.PercentagesGroup)
         self.verticalLayout_2.addWidget(self.PreferencesGroup)
         self.OutputGroup = QtWidgets.QGroupBox(self.InputTab)
         self.OutputGroup.setObjectName("OutputGroup")
@@ -203,3 +204,4 @@ class Ui_MainWindow(object):
         self.StartButton.setText(_translate("MainWindow", "Empezar"))
         self.TabWidget.setTabText(self.TabWidget.indexOf(self.InputTab), _translate("MainWindow", "Preparación previa"))
         self.TabWidget.setTabText(self.TabWidget.indexOf(self.NetTab), _translate("MainWindow", "Entrenamiento"))
+

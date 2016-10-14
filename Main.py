@@ -32,9 +32,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from Video import Video
 import matplotlib.pyplot as plt
 
-size = 300, 300
+size = (300, 300)
 
-vid = Video("big_buck_bunny_720p_5mb.mp4")
+vid = Video("Other/big_buck_bunny_720p_5mb.mp4", size)
 for img in vid:
     plt.imshow(img, interpolation='nearest')
     plt.show()

@@ -7,6 +7,8 @@ import pickle
 import numpy
 import PIL.Image as Image
 import scipy.misc as misc
+from pprint import pprint
+import matplotlib.pyplot as plt
 
 FRAME_EXTENSION = "jpg"
 
@@ -55,6 +57,7 @@ def get_pickle_dictionary(base_path, percentage_test=0.8):
     data_matrix_train = numpy.array([channel
                                      for channel in [misc.imread(image_path, flatten=True).flatten()
                                                      for image_path in frame_path_list[0:items_for_training]]])
+    pprint(data_matrix_train)
     label_list_train = numpy.array([label
                                     for label in _get_labels(frame_path_list[0:items_for_training])])
 

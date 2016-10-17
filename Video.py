@@ -3,16 +3,19 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import imageio
 from PIL import Image
 import numpy as np
+import scipy.misc as misc
+import scipy.ndimage as ndim
 
 
 class Video:
 
-    def __init__(self, filename, size=(300, 300)):
+    def __init__(self, filename, size=(300, 300), crop=(0, 0, 300, 300)):
         print("Leyendo " + filename)
         self.vid = imageio.get_reader(filename)
+        self.size = size
+        self.crop = crop
         self.len = len(self.vid)
         self.current = -1
-        self.size = size
         print("Leídos %d frames de %s." % (self.len, filename))
 
     def __iter__(self):
@@ -20,13 +23,13 @@ class Video:
 
     def __next__(self):
         self.current += 1
-        if self.current >= self.len:
+        if self.current >= self.len or self.current == 10:
             raise StopIteration
         else:
-            img = self.vid.get_data(self.current)
-            img = Image.fromarray(img)
+            img = Image.fromarray(self.vid.get_data(self.current))
             img = img.resize(self.size, Image.ANTIALIAS)
-            return np.asarray(img)
+            img = img.crop(self.crop)
+            return misc.fromimage(misc.toimage(img), flatten=True)
 
     next = __next__
 

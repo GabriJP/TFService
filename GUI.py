@@ -10,7 +10,7 @@ def getclassname(num):
 
 def getclassdirectory(num):
     # return input("Directorio de la clase %d: " % num)
-    return "Other/Videos"
+    return "Other/Classes/1"
 
 
 def getredimension():

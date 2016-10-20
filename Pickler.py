@@ -1,5 +1,5 @@
 import os
-from Video import Video
+from video import video
 import numpy as np
 import pickle as p
 
@@ -32,7 +32,7 @@ def getvideotaggedframes(classname, video):
     """
 
     :type classname: Name of the class of the video
-    :type video: Video
+    :type video: video
     """
     return [(classname, frame) for frame in video]
 
@@ -42,4 +42,4 @@ def getfilesinpath(path):
 
 
 def getclassframes(classname, classpath):
-    return [frame for file in getfilesinpath(classpath) for frame in getvideotaggedframes(classname, Video(file))]
+    return [frame for file in getfilesinpath(classpath) for frame in getvideotaggedframes(classname, video(file))]

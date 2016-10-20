@@ -5,18 +5,28 @@ def getclassnum():
 
 def getclassname(num):
     # return input("Nombre de la clase %d: " % num)
-    return "1"
+    switcher = {
+        0: "Mouse",
+        1: "Pen",
+        2: "Scissors"
+    }
+    return switcher.get(num)
 
 
 def getclassdirectory(num):
     # return input("Directorio de la clase %d: " % num)
-    return "Other/Classes/1"
+    switcher = {
+        0: "Mouse",
+        1: "Pen",
+        2: "Scissors"
+    }
+    return "Other/Classes/" + switcher.get(num)
 
 
 def getredimension():
     # raw = input("Redimensionar a: ")
     # height = raw[0:raw.index('x')]
-    # width = raw[raw.index('x')+1:]
+    # width = raw[raw.index('x')+Pen:]
     # return [height, width]
     return 500, 500
 
@@ -24,10 +34,10 @@ def getredimension():
 def getcrop():
     # raw = input("Recortar a: ")
     # height = raw[0:raw.index('x')]
-    # width = raw[raw.index('x') + 1:]
+    # width = raw[raw.index('x') + Pen:]
     # raw = input("Empezando en: ")
     # x = raw[0:raw.index('x')]
-    # y = raw[raw.index('x') + 1:]
+    # y = raw[raw.index('x') + Pen:]
     # return [height, width, x, y]
     return 100, 100, 400, 400
 

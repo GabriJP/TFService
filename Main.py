@@ -1,7 +1,8 @@
 # coding=utf-8
 from __future__ import absolute_import, division, print_function, unicode_literals
 from GUI import *
-import Pickler
+from video import video
+from dataset import dataset
 
 n = getclassnum()
 clases = []
@@ -14,4 +15,5 @@ crop = getcrop()
 percentages = getpercentages()
 output = getoutputdrectory()
 
-Pickler.pickle(clases, "output")
+dataSet = dataset([(class_name, video(path, redimensions, crop)) for class_name, path in clases])
+

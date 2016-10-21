@@ -1,5 +1,6 @@
 # coding=utf-8
 import numpy as np
+from multiprocessing.pool import ThreadPool
 
 
 class DataSet:
@@ -11,8 +12,12 @@ class DataSet:
         if videos is None:
             self.frames = []
         else:
-            self.frames = [(current_labeled_video[0], frame) for current_labeled_video in videos for frame in
-                           current_labeled_video[1]]
+            pool = ThreadPool()
+            results = [pool.apply_async(video.get_frames) for label, video in videos]
+            pool.close()
+            pool.join()
+            self.frames = [(label[0], frame) for label, thread_async_result in zip(videos, results) for frame in
+                           thread_async_result.get()]
             np.random.shuffle(self.frames)
         self.current = 0
 

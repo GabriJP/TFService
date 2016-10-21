@@ -55,7 +55,6 @@ for class_name, class_path in classes:
         videos.append((class_name, Video(join(class_path, filename), new_dimensions, crop_dimensions)))
 
 data_set = DataSet(videos)
-data_set.get_next()
 for label, frame in data_set:
     print(label)
 

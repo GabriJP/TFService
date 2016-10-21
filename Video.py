@@ -47,6 +47,6 @@ class Video:
         """
 
         :return: List of frames of this video
-        :rtype: list
+        :rtype: list(ndarray)
         """
         return [frame for frame in self]

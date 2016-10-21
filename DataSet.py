@@ -1,9 +1,9 @@
 import numpy as np
-from video import video
+from Video import Video
 
 
-class dataset:
-    def __init__(self, videos: [(str, video)] = None):
+class DataSet:
+    def __init__(self, videos: [(str, Video)] = None):
         """
         Builds a DataSet
 
@@ -21,7 +21,7 @@ class dataset:
     def __len__(self):
         return len(self.frames)
 
-    def add_video(self, label: str, v: video):
+    def add_video(self, label: str, v: Video):
         """
         Adds labeled video frames to this object
 

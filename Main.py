@@ -1,8 +1,8 @@
 # coding=utf-8
 from __future__ import absolute_import, division, print_function, unicode_literals
 from GUI import *
-from video import video
-from dataset import dataset
+from Video import Video
+from DataSet import DataSet
 
 n = getclassnum()
 clases = []
@@ -15,5 +15,4 @@ crop = getcrop()
 percentages = getpercentages()
 output = getoutputdrectory()
 
-dataSet = dataset([(class_name, video(path, redimensions, crop)) for class_name, path in clases])
-
+dataSet = DataSet([(class_name, Video(path, redimensions, crop)) for class_name, path in clases])

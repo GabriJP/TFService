@@ -5,7 +5,7 @@ from PIL import Image
 import scipy.misc as misc
 
 
-class video:
+class Video:
     def __init__(self, filename, size=(300, 300), crop=(0, 0, 300, 300)):
         self.vid = imageio.get_reader(filename)
         self.size = size

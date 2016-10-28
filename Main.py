@@ -11,9 +11,8 @@ import matplotlib.pyplot as plt
 
 """
 Program usage:
-python ProgramName.py class=class_name:class_directory [class=class_name:class_directory ...] \
-ndim='new_height'x'new_width' crop=x_from:y_from:x_to:y_to train=percentage_for_training val=percentage_for_validation \
-test=percentage_for_validation out=output_file
+python ProgramName.py classes=directory resize='new_height'x'new_width' crop=x_from:y_from:x_to:y_to
+train=percentage_for_training val=percentage_for_validation test=percentage_for_validation out=output_file
 
 Example:
 python ProgramName.py classes=Other/Classes resize=540x960 crop=20:230:520:730 train=0.75 val=0.15 test=0.1

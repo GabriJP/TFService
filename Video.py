@@ -2,7 +2,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import imageio
 from PIL import Image
-import scipy.misc as misc
 from sys import stderr
 
 
@@ -30,10 +29,10 @@ class Video:
             raise StopIteration
         else:
             try:
-                img = Image.fromarray(self.vid.get_data(self.current))
+                img = Image.fromarray(self.vid.get_data(self.current)).convert('L')
                 img = img.resize(self.new_dimensions, Image.ANTIALIAS)
                 img = img.crop(self.crop_dimensions)
-                return misc.fromimage(misc.toimage(img), flatten=True)
+                return img
             except RuntimeError:
                 print('Error reading "%s", ignoring error...' % self.filename, file=stderr)
                 raise StopIteration

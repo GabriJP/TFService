@@ -3,6 +3,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import imageio
 from PIL import Image
 from sys import stderr
+from io import BytesIO
+import base64
 
 
 class Video:
@@ -32,6 +34,9 @@ class Video:
                 img = Image.fromarray(self.vid.get_data(self.current)).convert('L')
                 img = img.resize(self.new_dimensions, Image.ANTIALIAS)
                 img = img.crop(self.crop_dimensions)
+                cache = BytesIO()
+                img.save(cache, format="JPEG")
+                img = base64.b64encode(cache.getvalue())
                 return img
             except RuntimeError:
                 print('Error reading "%s", ignoring error...' % self.filename, file=stderr)

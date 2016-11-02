@@ -8,15 +8,18 @@ from sys import argv, stderr
 from Pickler import *
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
+import base64
+from PIL import Image
+from io import BytesIO
+import numpy as np
 
 """
 Program usage:
-python ProgramName.py classes=directory resize='new_height'x'new_width' crop=x_from:y_from:x_to:y_to
+python ProgramName.py classes=directory resize='width'x'height' crop=x_from:y_from:x_to:y_to
 train=percentage_for_training val=percentage_for_validation test=percentage_for_validation out=output_file
 
 Example:
-python ProgramName.py classes=Other/Classes resize=540x960 crop=20:230:520:730 train=0.75 val=0.15 test=0.1
-out=Other/Output/Red.tf
+python Main.py classes=Other/Classes/Carreteras resize=140x80 crop=0:0:140:80 train=0.8 val=0 test=0.2 out=Other/Output/
 """
 
 classes_root = [arg[8:] for arg in argv if arg.startswith("classes=")]
@@ -69,10 +72,10 @@ for class_name, class_path in [(class_directory, join(classes_root, class_direct
 
 data_set = DataSet(videos)
 pickle(data_set, output, train, test, validation)
-train, test, val = unpickle("Other/Output")
+train, test, val = unpickle(output)
 
 for p in range(10):
     plt.subplot(2, 5, p + 1)
-    plt.imshow(train[p][1], cmap=cm.Greys_r)
+    plt.imshow(np.asarray(Image.open(BytesIO(base64.b64decode(train[p][1])))), cmap=cm.Greys_r)
     plt.xlabel(train[p][0])
 plt.show()

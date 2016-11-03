@@ -6,12 +6,8 @@ from os import listdir
 from os.path import isfile, join
 from sys import argv, stderr
 from Pickler import pickle, unpickle
-from PIL import Image
-from io import BytesIO
 from matplotlib import cm
 from matplotlib import pyplot as plt
-import base64
-import numpy as np
 
 """
 Program usage:
@@ -70,12 +66,13 @@ for class_name, class_path in [(class_directory, join(classes_root, class_direct
     for file_name in [file_name for file_name in listdir(class_path) if isfile(join(class_path, file_name))]:
         videos.append((class_name, Video(join(class_path, file_name), resize, crop)))
 
-data_set = DataSet(videos)
+data_set = DataSet(videos=videos)
 pickle(data_set, output, train, test, validation)
 train, test, val = unpickle(output)
+labels, frames = train.next_batch(10)
 
 for p in range(10):
     plt.subplot(2, 5, p + 1)
-    plt.imshow(np.asarray(Image.open(BytesIO(base64.b64decode(train[p][1])))), cmap=cm.Greys_r)
-    plt.xlabel(train[p][0])
+    plt.imshow(frames[p], cmap=cm.Greys_r)
+    plt.xlabel(labels[p])
 plt.show()

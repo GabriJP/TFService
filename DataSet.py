@@ -1,10 +1,13 @@
 # coding=utf-8
-import numpy as np
 from multiprocessing.pool import ThreadPool
+import base64
+import numpy as np
+from PIL import Image
+from io import BytesIO
 
 
 class DataSet:
-    def __init__(self, videos=None):
+    def __init__(self, videos=None, new_frames=None):
         """
 
         :param videos: list of tuples (label, video)
@@ -19,6 +22,8 @@ class DataSet:
             self.frames = [(label[0], frame) for label, thread_async_result in zip(videos, results) for frame in
                            thread_async_result.get()]
             np.random.shuffle(self.frames)
+        if new_frames is not None:
+            self.frames.extend(new_frames)
         self.current = 0
 
     def __iter__(self):
@@ -49,6 +54,11 @@ class DataSet:
         self.current += n
         return self.frames[self.current - n:self.current]
 
+    def next_batch(self, n=10):
+        self.current += n
+        return [l[0] for l in self.frames[self.current - n:self.current]], [
+            np.asarray(Image.open(BytesIO(base64.b64decode(l[1])))) for l in self.frames[self.current - n:self.current]]
+
     def get_frames_per_label(self):
         result = {}
         for label, frame in self.frames:
@@ -58,3 +68,6 @@ class DataSet:
                 result[label] += 1
 
         return result
+
+    def add_all(self, frame_list):
+        self.frames.extend(frame_list)

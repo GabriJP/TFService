@@ -1,5 +1,6 @@
 import pickle as p
 import os
+from DataSet import DataSet
 from os.path import join
 
 pickle_protocol = 2
@@ -26,7 +27,6 @@ def pickle(data_set, output_directory, train_pct=0.6, test_pct=0.2, validation_p
 def unpickle(directory):
     if os.access(join(directory, train_name), os.F_OK) and os.access(join(directory, test_name), os.F_OK) and os.access(
             join(directory, validation_name), os.F_OK):
-
-        return p.load(open(os.path.join(directory, train_name), "rb")), \
-            p.load(open(os.path.join(directory, test_name), "rb")), \
-            p.load(open(os.path.join(directory, validation_name), "rb"))
+        return DataSet(new_frames=p.load(open(os.path.join(directory, train_name), "rb"))), DataSet(
+            new_frames=p.load(open(os.path.join(directory, test_name), "rb"))), DataSet(
+            new_frames=p.load(open(os.path.join(directory, validation_name), "rb")))

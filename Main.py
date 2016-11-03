@@ -3,12 +3,12 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from Video import Video
 from DataSet import DataSet
 from os import listdir
-from os.path import isfile
+from os.path import isfile, join
 from sys import argv, stderr
-from Pickler import *
-from matplotlib import cm
+from Pickler import pickle, unpickle
 from PIL import Image
 from io import BytesIO
+from matplotlib import cm
 from matplotlib import pyplot as plt
 import base64
 import numpy as np

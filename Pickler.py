@@ -8,16 +8,18 @@ test_name = "test_objects"
 validation_name = "validation_objects"
 
 
-def pickle(dataset, output_directory, train_pct=0.6, test_pct=0.2, validation_pct=0.2):
-    items_for_training = int(train_pct * len(dataset))
-    items_form_testing = int(test_pct * len(dataset))
-    items_for_validation = int(validation_pct * len(dataset))
+def pickle(data_set, output_directory, train_pct=0.6, test_pct=0.2, validation_pct=0.2):
+    if not os.path.exists(output_directory):
+        os.makedirs(output_directory, 0o0755)
+    items_for_training = int(train_pct * len(data_set))
+    items_form_testing = int(test_pct * len(data_set))
+    items_for_validation = int(validation_pct * len(data_set))
 
-    p.dump(dataset.get_next(items_for_training), open(os.path.join(output_directory, train_name), "wb"),
+    p.dump(data_set.get_next(items_for_training), open(os.path.join(output_directory, train_name), "wb"),
            pickle_protocol)
-    p.dump(dataset.get_next(items_form_testing), open(os.path.join(output_directory, test_name), "wb"),
+    p.dump(data_set.get_next(items_form_testing), open(os.path.join(output_directory, test_name), "wb"),
            pickle_protocol)
-    p.dump(dataset.get_next(items_for_validation), open(os.path.join(output_directory, validation_name), "wb"),
+    p.dump(data_set.get_next(items_for_validation), open(os.path.join(output_directory, validation_name), "wb"),
            pickle_protocol)
 
 

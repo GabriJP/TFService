@@ -6,11 +6,11 @@ from os import listdir
 from os.path import isfile
 from sys import argv, stderr
 from Pickler import *
-import matplotlib.cm as cm
-import matplotlib.pyplot as plt
-import base64
+from matplotlib import cm
 from PIL import Image
 from io import BytesIO
+from matplotlib import pyplot as plt
+import base64
 import numpy as np
 
 """

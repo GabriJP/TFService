@@ -18,6 +18,7 @@ Example:
 python Main.py classes=Other/Classes/Carreteras resize=140x80 crop=0:0:140:80 train=0.8 val=0 test=0.2 out=Other/Output/
 """
 
+
 classes_root = [arg[8:] for arg in argv if arg.startswith("classes=")]
 if len(classes_root) < 1:
     print("Not enough class arguments", file=stderr)

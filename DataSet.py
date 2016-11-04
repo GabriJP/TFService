@@ -1,9 +1,6 @@
 # coding=utf-8
 from multiprocessing.pool import ThreadPool
-import base64
 import numpy as np
-from PIL import Image
-from io import BytesIO
 
 
 class DataSet:
@@ -42,22 +39,9 @@ class DataSet:
         self.frames.extend([(label, frame) for frame in v])
         np.random.shuffle(self.frames)
 
-    def get_next(self, n=10):
-        """
-        Returns a list of max size n with random frames
-
-        :param n: Max size of the list to return
-        :return: A list of tuples (label, frame) of size 0-n. If returned list is not size n, there are not more
-        :rtype: list[(string, numpy.ndarray)]
-        elements
-        """
-        self.current += n
-        return self.frames[self.current - n:self.current]
-
     def next_batch(self, n=10):
         self.current += n
-        return [l[0] for l in self.frames[self.current - n:self.current]], [
-            np.asarray(Image.open(BytesIO(base64.b64decode(l[1])))) for l in self.frames[self.current - n:self.current]]
+        return tuple(zip(*self.frames[self.current - n:self.current]))
 
     def get_frames_per_label(self):
         result = {}

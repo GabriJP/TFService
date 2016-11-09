@@ -1,13 +1,15 @@
 # coding=utf-8
 from __future__ import absolute_import, division, print_function, unicode_literals
-from Video import Video
-from DataSet import DataSet
+
 from os import listdir
 from os.path import isfile, join
 from sys import argv, stderr
 from Pickler import pickle, unpickle
 from matplotlib import cm
 from matplotlib import pyplot as plt
+
+from DataSet import DataSet
+from Video import Video
 
 """
 Program usage:

@@ -1,13 +1,17 @@
-import base64
-import pickle as p
-import os
+# coding=utf-8
+from __future__ import absolute_import, division, print_function, unicode_literals
 
+import base64
+import os
+import gzip
+import pickle as p
 import numpy as np
+
 from PIL import Image
 from io import BytesIO
+from os.path import join
 
 from DataSet import DataSet
-from os.path import join
 
 pickle_protocol = -1
 train_name = "train_objects"
@@ -29,7 +33,8 @@ def pickle(data_set, output_directory, train_pct=0.6, test_pct=0.2, validation_p
 
 
 def save_to_file(labelled_frames, path):
-    p.dump([(label, to_base64(frame)) for label, frame in zip(*labelled_frames)], open(path, "wb"), pickle_protocol)
+    p.dump([(label, to_base64(frame)) for label, frame in zip(*labelled_frames)], gzip.open(path, "wb"),
+           pickle_protocol)
 
 
 def to_base64(image):
@@ -45,7 +50,7 @@ def unpickle(directory):
 
 def load_from_file(path):
     if os.access(path, os.F_OK) and os.path.getsize(path) > 20:
-        return DataSet(new_frames=[(label, from_base64(frame)) for label, frame in p.load(open(path, "rb"))])
+        return DataSet(new_frames=[(label, from_base64(frame)) for label, frame in p.load(gzip.open(path, "rb"))])
     else:
         return DataSet()
 

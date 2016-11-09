@@ -1,6 +1,9 @@
 # coding=utf-8
-from multiprocessing.pool import ThreadPool
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import numpy as np
+
+from multiprocessing.pool import ThreadPool
 
 
 class DataSet:

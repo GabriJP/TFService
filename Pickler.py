@@ -14,27 +14,22 @@ from os.path import join
 from DataSet import DataSet
 
 pickle_protocol = -1
-train_name = "train_objects"
-test_name = "test_objects"
-validation_name = "validation_objects"
+frames_name = "frames_data"
+control_data_name = "control_data"
 
 
-def pickle(data_set, output_directory, train_pct=0.6, test_pct=0.2, validation_pct=0.2):
-    if not os.path.exists(output_directory):
-        os.makedirs(output_directory, 0o0755)
+def pickle(data_set, directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory, 0o0755)
 
-    items_for_training = int(train_pct * len(data_set))
-    items_form_testing = int(test_pct * len(data_set))
-    items_for_validation = int(validation_pct * len(data_set))
+    control_data_file = gzip.open(join(directory, control_data_name), "wb")
+    p.dump(data_set.get_control_data(), control_data_file, pickle_protocol)
+    control_data_file.close()
 
-    save_to_file(data_set.next_batch(items_for_training), join(output_directory, train_name))
-    save_to_file(data_set.next_batch(items_form_testing), join(output_directory, test_name))
-    save_to_file(data_set.next_batch(items_for_validation), join(output_directory, validation_name))
-
-
-def save_to_file(labelled_frames, path):
-    p.dump([(label, to_base64(frame)) for label, frame in zip(*labelled_frames)], gzip.open(path, "wb"),
+    frames_file = gzip.open(join(directory, frames_name), "wb")
+    p.dump([(label, to_base64(frame)) for label, frame in data_set.get_all_labelled_frames()], frames_file,
            pickle_protocol)
+    frames_file.close()
 
 
 def to_base64(image):
@@ -44,15 +39,22 @@ def to_base64(image):
 
 
 def unpickle(directory):
-    return load_from_file(join(directory, train_name)), load_from_file(join(directory, test_name)), load_from_file(
-        join(directory, validation_name))
+    if not os.access(join(directory, frames_name), os.F_OK):
+        raise IOError("frames file not found")
 
+    if not os.access(join(directory, control_data_name), os.F_OK):
+        raise IOError("control data file not found")
 
-def load_from_file(path):
-    if os.access(path, os.F_OK) and os.path.getsize(path) > 20:
-        return DataSet(new_frames=[(label, from_base64(frame)) for label, frame in p.load(gzip.open(path, "rb"))])
-    else:
-        return DataSet()
+    control_data_file = gzip.open(join(directory, control_data_name), "rb")
+    control_data = p.load(control_data_file)
+    control_data_file.close()
+
+    frames_file = gzip.open(join(directory, frames_name), "rb")
+    frames = p.load(frames_file)
+    frames_file.close()
+
+    return DataSet([(label, from_base64(frame)) for label, frame in frames], control_data[0], control_data[1],
+                   control_data[2])
 
 
 def from_base64(image):

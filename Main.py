@@ -11,6 +11,8 @@ from matplotlib import pyplot as plt
 from DataSet import DataSet
 from Video import Video
 
+from nn import nn
+
 """
 Program usage:
 python ProgramName.py classes=directory resize='width'x'height' crop=x_from:y_from:x_to:y_to
@@ -19,7 +21,6 @@ train=percentage_for_training val=percentage_for_validation test=percentage_for_
 Example:
 python Main.py classes=Other/Classes/Carreteras resize=140x80 crop=0:0:140:80 train=0.8 val=0 test=0.2 out=Other/Output/
 """
-
 
 classes_root = [arg[8:] for arg in argv if arg.startswith("classes=")]
 if len(classes_root) < 1:
@@ -69,13 +70,15 @@ for class_name, class_path in [(class_directory, join(classes_root, class_direct
     for file_name in [file_name for file_name in listdir(class_path) if isfile(join(class_path, file_name))]:
         videos.append((class_name, Video(join(class_path, file_name), resize, crop)))
 
-data_set = DataSet(videos=videos)
-pickle(data_set, output, train, test, validation)
-train, test, val = unpickle(output)
-labels, frames = train.next_batch(10)
+data_set = DataSet.from_videos(videos, train, test)
+pickle(data_set, output)
+data_set = unpickle(output)
+# labels, frames = train.next_batch(10)
+#
+# for p in range(10):
+#     plt.subplot(2, 5, p + 1)
+#     plt.imshow(frames[p], cmap=cm.Greys_r)
+#     plt.xlabel(labels[p])
+# plt.show()
 
-for p in range(10):
-    plt.subplot(2, 5, p + 1)
-    plt.imshow(frames[p], cmap=cm.Greys_r)
-    plt.xlabel(labels[p])
-plt.show()
+nn(data_set)

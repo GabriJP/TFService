@@ -22,32 +22,16 @@ class Video:
                 new_dimensions[1]:
             raise ValueError("Crop size bigger than resize")
 
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        self.current += 1
-        if self.current >= self.len:
-            raise StopIteration
-        else:
-            try:
-                img = Image.fromarray(self.vid.get_data(self.current)).convert('L')
-                img = img.resize(self.new_dimensions, Image.ANTIALIAS)
-                img = img.crop(self.crop_dimensions)
-                return img
-            except RuntimeError:
-                print('Error reading "%s", ignoring error...' % self.filename, file=stderr)
-                raise StopIteration
-
-    next = __next__
-
-    def __len__(self):
-        return self.len
-
     def get_frames(self):
         """
 
         :return: List of frames of this video
         :rtype: list(ndarray)
         """
-        return [frame for frame in self]
+        result = []
+        for frame in self.vid:
+            img = Image.fromarray(frame).convert('L')
+            img = img.resize(self.new_dimensions, Image.ANTIALIAS)
+            img = img.crop(self.crop_dimensions)
+            result.append(img)
+        return result

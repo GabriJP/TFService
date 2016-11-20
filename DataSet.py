@@ -12,6 +12,7 @@ from multiprocessing.pool import ThreadPool
 from os.path import join
 from PIL import Image
 from io import BytesIO
+from collections import defaultdict
 
 pickled_dataset_filename = "dataset"
 pickle_protocol = 2
@@ -60,16 +61,14 @@ class DataSet:
         dictionary = p.load(file)
         file.close()
 
-        train_set = cls.list_base64_to_numpy(dictionary['train_set'])
-        test_set = cls.list_base64_to_numpy(dictionary['test_set'])
-        validation_set = cls.list_base64_to_numpy(dictionary['validation_set'])
+        func = (lambda y: list(map((lambda x: (x[0], cls.image_base64_to_numpy(x[1]))), y)))
+
+        train_set = func(dictionary['train_set'])
+        test_set = func(dictionary['test_set'])
+        validation_set = func(dictionary['validation_set'])
 
         return cls(train_set, test_set, validation_set, dictionary['n_classes'], dictionary['train_pct'],
                    dictionary['test_pct'])
-
-    @classmethod
-    def list_base64_to_numpy(cls, labelled_frames):
-        return [(label, cls.image_base64_to_numpy(frame)) for label, frame in labelled_frames]
 
     @staticmethod
     def image_base64_to_numpy(image):
@@ -79,9 +78,11 @@ class DataSet:
         if not os.path.exists(directory):
             os.makedirs(directory, 0o0755)
 
-        train_set = self.list_numpy_to_base64(self.train)
-        test_set = self.list_numpy_to_base64(self.test)
-        validation_set = self.list_numpy_to_base64(self.validation)
+        func = (lambda y: list(map((lambda x: (x[0], self.image_numpy_to_base64(x[1]))), y)))
+
+        train_set = func(self.train)
+        test_set = func(self.test)
+        validation_set = func(self.validation)
 
         dictionary = {'train_set': train_set, 'test_set': test_set, 'validation_set': validation_set,
                       'n_classes': self.number_of_classes, 'train_pct': self.train_pct, 'test_pct': self.test_pct}
@@ -90,10 +91,6 @@ class DataSet:
         p.dump(dictionary, file, pickle_protocol)
         file.close()
 
-    @classmethod
-    def list_numpy_to_base64(cls, labelled_frames):
-        return [(label, cls.image_numpy_to_base64(frame)) for label, frame in labelled_frames]
-
     @staticmethod
     def image_numpy_to_base64(image):
         cache = BytesIO()
@@ -101,33 +98,31 @@ class DataSet:
         return base64.b64encode(cache.getvalue())
 
     def next_training_batch(self, size=10):
-        if self.training_index + size >= len(self.train):
-            self.training_index = 0
         self.training_index += size
+        if self.training_index > len(self.train):
+            self.training_index = size
         return tuple(zip(*self.train[self.training_index - size:self.training_index]))
 
     def next_test_batch(self, size=10):
-        if self.test_index + size >= len(self.test):
-            self.test_index = 0
         self.test_index += size
+        if self.test_index > len(self.test):
+            self.test_index = size
         return tuple(zip(*self.test[self.test_index - size:self.test_index]))
 
     def next_validation_batch(self, size=10):
-        if self.validation_index + size >= len(self.validation):
-            self.validation_index = 0
         self.validation_index += size
+        if self.validation_index > len(self.validation):
+            self.validation_index = size
         return tuple(zip(*self.validation[self.validation_index - size:self.validation_index]))
 
     def get_frames_per_label(self):
-        result = {}
-        labels = list(zip(*self.train))[0]
-        labels.extend(list(zip(*self.test))[0])
-        labels.extend(list(zip(*self.validation))[0])
-        for label in labels:
-            if label not in result:
-                result[label] = 1
-            else:
-                result[label] += 1
+        result = defaultdict(int)
+        for label, frame in self.train:
+            result[label] += 1
+        for label, frame in self.test:
+            result[label] += 1
+        for label, frame in self.validation:
+            result[label] += 1
 
         return result
 

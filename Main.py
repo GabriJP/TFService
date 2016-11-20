@@ -4,8 +4,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from os import listdir
 from os.path import isfile, join
 from sys import argv, stderr
-from matplotlib import cm
-from matplotlib import pyplot as plt
 
 from DataSet import DataSet
 from Video import Video
@@ -72,6 +70,9 @@ for class_name, class_path in [(class_directory, join(classes_root, class_direct
 data_set = DataSet.from_videos(videos, train, test)
 data_set.to_file(output)
 data_set = DataSet.from_file(output)
+
+# from matplotlib import cm
+# from matplotlib import pyplot as plt
 # labels, frames = train.next_batch(10)
 #
 # for p in range(10):

@@ -1,15 +1,29 @@
 # coding=utf-8
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import base64
+import os
+import gzip
+
 import numpy as np
+import pickle as p
 
 from multiprocessing.pool import ThreadPool
+from os.path import join
+from PIL import Image
+from io import BytesIO
+
+pickled_dataset_filename = "dataset"
+pickle_protocol = 2
 
 
 class DataSet:
-    def __init__(self, labelled_frames, number_of_classes, train_pct=0.85, test_pct=0.15):
+    def __init__(self, train_set, test_set, validation_set, number_of_classes, train_pct=0.85, test_pct=0.15):
         if train_pct + test_pct > 1:
             raise AttributeError("train_pct + test_pct must be less than or equal to 1")
+        self.train = train_set
+        self.test = test_set
+        self.validation = validation_set
         self.number_of_classes = number_of_classes
         self.train_pct = train_pct
         self.test_pct = test_pct
@@ -17,11 +31,6 @@ class DataSet:
         self.training_index = 0
         self.test_index = 0
         self.validation_index = 0
-        train_index = int(len(labelled_frames) * train_pct)
-        test_index = int(len(labelled_frames) * test_pct) + train_index
-        self.train = labelled_frames[:train_index]
-        self.test = labelled_frames[train_index:test_index]
-        self.validation = labelled_frames[test_index:]
 
     @classmethod
     def from_videos(cls, videos, train_pct, test_pct):
@@ -33,7 +42,63 @@ class DataSet:
                   thread_async_result.get()]
         np.random.shuffle(frames)
 
-        return cls(frames, len(set(list(zip(*videos))[0])), train_pct, test_pct)
+        train_index = int(len(frames) * train_pct)
+        test_index = int(len(frames) * test_pct) + train_index
+
+        train_set = frames[:train_index]
+        test_set = frames[train_index:test_index]
+        validation_set = frames[test_index:]
+
+        return cls(train_set, test_set, validation_set, len(set(list(zip(*videos))[0])), train_pct, test_pct)
+
+    @classmethod
+    def from_file(cls, directory):
+        if not os.access(join(directory, pickled_dataset_filename), os.F_OK):
+            raise IOError("Dataset file not found")
+
+        file = gzip.open(join(directory, pickled_dataset_filename), "rb")
+        dictionary = p.load(file)
+        file.close()
+
+        train_set = cls.list_base64_to_numpy(dictionary['train_set'])
+        test_set = cls.list_base64_to_numpy(dictionary['test_set'])
+        validation_set = cls.list_base64_to_numpy(dictionary['validation_set'])
+
+        return cls(train_set, test_set, validation_set, dictionary['n_classes'], dictionary['train_pct'],
+                   dictionary['test_pct'])
+
+    @classmethod
+    def list_base64_to_numpy(cls, labelled_frames):
+        return [(label, cls.image_base64_to_numpy(frame)) for label, frame in labelled_frames]
+
+    @staticmethod
+    def image_base64_to_numpy(image):
+        return np.asarray(Image.open(BytesIO(base64.b64decode(image))))
+
+    def to_file(self, directory):
+        if not os.path.exists(directory):
+            os.makedirs(directory, 0o0755)
+
+        train_set = self.list_numpy_to_base64(self.train)
+        test_set = self.list_numpy_to_base64(self.test)
+        validation_set = self.list_numpy_to_base64(self.validation)
+
+        dictionary = {'train_set': train_set, 'test_set': test_set, 'validation_set': validation_set,
+                      'n_classes': self.number_of_classes, 'train_pct': self.train_pct, 'test_pct': self.test_pct}
+
+        file = gzip.open(join(directory, pickled_dataset_filename), "wb")
+        p.dump(dictionary, file, pickle_protocol)
+        file.close()
+
+    @classmethod
+    def list_numpy_to_base64(cls, labelled_frames):
+        return [(label, cls.image_numpy_to_base64(frame)) for label, frame in labelled_frames]
+
+    @staticmethod
+    def image_numpy_to_base64(image):
+        cache = BytesIO()
+        image.save(cache, format="JPEG")
+        return base64.b64encode(cache.getvalue())
 
     def next_training_batch(self, size=10):
         if self.training_index + size >= len(self.train):
@@ -53,9 +118,6 @@ class DataSet:
         self.validation_index += size
         return tuple(zip(*self.validation[self.validation_index - size:self.validation_index]))
 
-    def add_video(self, label, v):
-        self.add_all([(label, frame) for frame in v])
-
     def get_frames_per_label(self):
         result = {}
         labels = list(zip(*self.train))[0]
@@ -68,19 +130,6 @@ class DataSet:
                 result[label] += 1
 
         return result
-
-    def add_all(self, labelled_frames):
-        train_index = int(len(labelled_frames) * self.train_pct)
-        test_index = int(len(labelled_frames) * self.test_pct) + train_index
-        self.train = labelled_frames[:train_index]
-        self.test = labelled_frames[train_index:test_index]
-        self.validation = labelled_frames[test_index:]
-        self.train.extend(labelled_frames[:len(labelled_frames) * self.train_pct])
-        self.test.extend(labelled_frames[len(labelled_frames) * self.train_pct:len(labelled_frames) * self.test_pct])
-        self.validation.extend(labelled_frames[len(labelled_frames) * self.test_pct:])
-        np.random.shuffle(self.train)
-        np.random.shuffle(self.test)
-        np.random.shuffle(self.validation)
 
     def get_number_of_classes(self):
         return len(self.get_classes())
@@ -95,17 +144,5 @@ class DataSet:
             label_set.add(label)
         return label_set
 
-    def frame_size(self):
-        return self.train[0][1].shape
-
     def frame_pixels(self):
         return self.train[0][1].size
-
-    def get_all_labelled_frames(self):
-        result = self.train
-        result.extend(self.test)
-        result.extend(self.validation)
-        return result
-
-    def get_control_data(self):
-        return self.number_of_classes, self.train_pct, self.test_pct

@@ -4,7 +4,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from os import listdir
 from os.path import isfile, join
 from sys import argv, stderr
-from Pickler import pickle, unpickle
 from matplotlib import cm
 from matplotlib import pyplot as plt
 
@@ -71,8 +70,8 @@ for class_name, class_path in [(class_directory, join(classes_root, class_direct
         videos.append((class_name, Video(join(class_path, file_name), resize, crop)))
 
 data_set = DataSet.from_videos(videos, train, test)
-pickle(data_set, output)
-data_set = unpickle(output)
+data_set.to_file(output)
+data_set = DataSet.from_file(output)
 # labels, frames = train.next_batch(10)
 #
 # for p in range(10):

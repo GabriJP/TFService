@@ -4,9 +4,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from os import listdir
 from os.path import isfile, join
 from sys import argv, stderr
+from Pickler import pickle, unpickle
+from matplotlib import cm
+from matplotlib import pyplot as plt
 
 from DataSet import DataSet
-from Video import Video
 
 from nn import nn
 
@@ -65,20 +67,17 @@ videos = []
 for class_name, class_path in [(class_directory, join(classes_root, class_directory)) for class_directory in
                                listdir(classes_root) if not isfile(join(classes_root, class_directory))]:
     for file_name in [file_name for file_name in listdir(class_path) if isfile(join(class_path, file_name))]:
-        videos.append((class_name, Video(join(class_path, file_name), resize, crop)))
+        videos.append((class_name, join(class_path, file_name)))
 
-data_set = DataSet.from_videos(videos, train, test)
-data_set.to_file(output)
-data_set = DataSet.from_file(output)
+data_set = DataSet.from_videos(videos, resize, crop, train, test)
+pickle(data_set, output)
+data_set = unpickle(output)
+labels, frames = data_set.next_test_batch(10)
 
-# from matplotlib import cm
-# from matplotlib import pyplot as plt
-# labels, frames = train.next_batch(10)
-#
-# for p in range(10):
-#     plt.subplot(2, 5, p + 1)
-#     plt.imshow(frames[p], cmap=cm.Greys_r)
-#     plt.xlabel(labels[p])
-# plt.show()
+for p in range(10):
+    plt.subplot(2, 5, p + 1)
+    plt.imshow(frames[p], cmap=cm.Greys_r)
+    plt.xlabel(labels[p])
+plt.show()
 
-nn(data_set)
+# nn(data_set)

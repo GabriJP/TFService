@@ -51,13 +51,13 @@ class DataSet:
         return cls.from_videos(videos.items(), new_dimensions, crop_dimensions, train_pct, test_pct)
 
     @classmethod
-    def from_videos(cls, videos, new_dimensions, crop_dimensions, train_pct, test_pct):
+    def from_videos(cls, label_videos, new_dimensions, crop_dimensions, train_pct, test_pct):
         pool = ThreadPool()
         results = [pool.apply_async(cls.get_frames_from_video, (video, new_dimensions, crop_dimensions)) for
-                   label, video in videos]
+                   label, videos in label_videos for video in videos]
         pool.close()
         pool.join()
-        frames = [(label_file[0], frame) for label_file, thread_async_result in zip(videos, results) for frame in
+        frames = [(label_file[0], frame) for label_file, thread_async_result in zip(label_videos, results) for frame in
                   thread_async_result.get()]
         np.random.shuffle(frames)
 
@@ -68,7 +68,7 @@ class DataSet:
         test_set = frames[train_index:test_index]
         validation_set = frames[test_index:]
 
-        return cls(train_set, test_set, validation_set, len(set(list(zip(*videos))[0])), train_pct, test_pct)
+        return cls(train_set, test_set, validation_set, len(set(list(zip(*label_videos))[0])), train_pct, test_pct)
 
     @staticmethod
     def get_frames_from_video(filename, new_dimensions, crop_dimensions):

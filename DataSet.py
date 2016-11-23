@@ -154,7 +154,7 @@ class DataSet:
             label_set.add(label)
         for label, frame in self.validation:
             label_set.add(label)
-        return label_set
+        return list(label_set)
 
     def frame_pixels(self):
         return self.train[0][1].size

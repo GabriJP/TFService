@@ -19,12 +19,12 @@ def one_hot(label_list, n):
 
 def nn(data_set):
     n_classes = data_set.get_number_of_classes()
-    classes = list(data_set.get_classes())
+    classes = data_set.get_classes()
     labels = one_hot(list(range(n_classes)), n_classes)
 
     # Parameters
     learning_rate = 0.001
-    training_iters = 2000
+    training_iters = 3000
     batch_size = 32
     display_step = 10
 

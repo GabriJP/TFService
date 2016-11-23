@@ -14,8 +14,9 @@ import pickle as p
 from multiprocessing.pool import ThreadPool
 from PIL import Image
 from sys import stderr
-from os.path import join
 from io import BytesIO
+from os.path import join, isfile
+from os import listdir
 
 pickled_dataset_filename = "dataset"
 pickle_protocol = 2
@@ -35,6 +36,19 @@ class DataSet:
         self.training_index = 0
         self.test_index = 0
         self.validation_index = 0
+
+    @classmethod
+    def from_directory(cls, root_directory, new_dimensions, crop_dimensions, train_pct, test_pct):
+        directories = {directory: join(root_directory, directory) for directory in listdir(root_directory) if
+                       not isfile(join(root_directory, directory))}
+
+        videos = defaultdict(dict)
+
+        for label, directory in directories.items():
+            files = [join(directory, file) for file in listdir(directory) if isfile(join(directory, file))]
+            videos[label] = files
+
+        return cls.from_videos(videos.items(), new_dimensions, crop_dimensions, train_pct, test_pct)
 
     @classmethod
     def from_videos(cls, videos, new_dimensions, crop_dimensions, train_pct, test_pct):

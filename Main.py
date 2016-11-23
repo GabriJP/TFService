@@ -1,8 +1,6 @@
 # coding=utf-8
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from os import listdir
-from os.path import isfile, join
 from sys import argv, stderr
 
 from DataSet import DataSet
@@ -59,13 +57,7 @@ if len(output) < 1:
     exit(1)
 output = output[0]
 
-videos = []
-for class_name, class_path in [(class_directory, join(classes_root, class_directory)) for class_directory in
-                               listdir(classes_root) if not isfile(join(classes_root, class_directory))]:
-    for file_name in [file_name for file_name in listdir(class_path) if isfile(join(class_path, file_name))]:
-        videos.append((class_name, join(class_path, file_name)))
-
-data_set = DataSet.from_videos(videos, resize, crop, train, test)
+data_set = DataSet.from_directory(classes_root, resize, crop, train, test)
 data_set.to_file(output)
 data_set = DataSet.from_file(output)
 labels, frames = data_set.next_test_batch(10)

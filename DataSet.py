@@ -172,3 +172,6 @@ class DataSet:
 
     def frame_pixels(self):
         return self.train[0][1].size
+
+    def get_frame_dimensions(self):
+        return self.train[0][1].shape

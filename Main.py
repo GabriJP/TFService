@@ -6,6 +6,8 @@ from sys import argv, stderr
 from DataSet import DataSet
 from nn import nn
 
+import Inception
+
 """
 Program usage:
 python ProgramName.py classes=directory resize='width'x'height' crop=x_from:y_from:x_to:y_to
@@ -60,7 +62,7 @@ output = output[0]
 data_set = DataSet.from_directory(classes_root, resize, crop, train, test)
 data_set.to_file(output)
 data_set = DataSet.from_file(output)
-labels, frames = data_set.next_test_batch(10)
+# labels, frames = data_set.next_test_batch(10)
 
 # from matplotlib import cm
 # from matplotlib import pyplot as plt
@@ -70,4 +72,4 @@ labels, frames = data_set.next_test_batch(10)
 #     plt.xlabel(labels[p])
 # plt.show()
 
-nn(data_set)
+Inception.nn(data_set)

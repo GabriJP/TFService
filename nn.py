@@ -108,7 +108,7 @@ def nn(data_set):
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
     # Initializing the variables
-    init = tf.initialize_all_variables()
+    init = tf.global_variables_initializer()
 
     # Add ops to save and restore all the variables.
     saver = tf.train.Saver()

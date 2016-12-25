@@ -5,6 +5,7 @@ from sys import argv, stderr
 
 from DataSet import DataSet
 from CNNCreator import create_cnn
+from CNNPlayer import play_cnn
 
 
 """
@@ -61,6 +62,7 @@ output = output[0]
 data_set = DataSet.from_directory(classes_root, resize, crop, train, test)
 data_set.to_file(output)
 data_set = DataSet.from_file(output)
+
 # labels, frames = data_set.next_test_batch(10)
 
 # from matplotlib import cm
@@ -72,3 +74,4 @@ data_set = DataSet.from_file(output)
 # plt.show()
 
 create_cnn(data_set, save_path=output)
+play_cnn(DataSet.get_meta(output))

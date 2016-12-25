@@ -85,7 +85,7 @@ class DataSet:
         for label, frame in validation_set:
             label_set.add(label)
 
-        network_expected_outputs = DataSet.one_hot(list(range(number_of_classes)), number_of_classes)
+        network_expected_outputs = cls.one_hot(list(range(number_of_classes)), number_of_classes)
         label_with_expected_output = dict(zip(label_set, network_expected_outputs))
 
         func = (lambda labelled_frame: (label_with_expected_output.get(labelled_frame[0]), labelled_frame[1]))
@@ -93,11 +93,11 @@ class DataSet:
         test_set = list(map(func, test_set))
         validation_set = list(map(func, validation_set))
 
-        return cls(train_set, test_set, validation_set, number_of_classes, frames[0][1].size,
+        return cls(train_set, test_set, validation_set, number_of_classes, frames[0][1].shape,
                    label_with_expected_output, train_pct, test_pct)
 
-    @staticmethod
-    def get_frames_from_video(filename, new_dimensions, crop_dimensions):
+    @classmethod
+    def get_frames_from_video(cls, filename, new_dimensions, crop_dimensions):
         vid = imageio.get_reader(filename)
         first_frame = vid.get_data(0)
         if first_frame.shape[0] / new_dimensions[0] != first_frame.shape[1] / new_dimensions[1]:
@@ -106,8 +106,13 @@ class DataSet:
                 new_dimensions[1]:
             raise ValueError("Crop size bigger than resize")
 
-        func = (lambda x: Image.fromarray(x).convert('L').resize(new_dimensions, Image.ANTIALIAS).crop(crop_dimensions))
+        func = (lambda x: cls.process_frame(x, new_dimensions, crop_dimensions))
         return list(map(func, vid))
+
+    @staticmethod
+    def process_frame(frame, new_dimensions, crop_dimensions):
+        return np.asarray(
+            Image.fromarray(frame).convert('L').resize(new_dimensions, Image.ANTIALIAS).crop(crop_dimensions))
 
     @classmethod
     def from_file(cls, directory):
@@ -162,7 +167,8 @@ class DataSet:
                            'shape': self.shape,
                            'labels': self.labels,
                            'train_pct': self.train_pct,
-                           'test_pct': self.test_pct}
+                           'test_pct': self.test_pct,
+                           'frame_pixels': self.frame_pixels()}
 
         file = gzip.open(join(directory, pickled_dataset_filename), "wb")
         p.dump(dictionary, file, pickle_protocol)

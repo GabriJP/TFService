@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import tensorflow as tf
+from DataSet import DataSet
 
 
 # Create some wrappers for simplicity
@@ -46,8 +47,7 @@ def conv_net(x, weights, biases):
 
 
 def play_cnn(meta_dataset):
-    width, height = meta_dataset['shape']
-    n_input = width * height
+    n_input = meta_dataset['frame_pixels']
     n_classes = meta_dataset['n_classes']
 
     x = tf.placeholder(tf.float32, [None, n_input])
@@ -89,15 +89,12 @@ def play_cnn(meta_dataset):
 
         while True:
             ret, img = cap.read()
-            resized = cv2.resize(img, meta_dataset['shape'], interpolation=cv2.INTER_AREA)
             # cropped = resized[0:180, 70:250]
             # resized64 = cv2.resize(cropped, (128, 128), interpolation = cv2.INTER_AREA)
             # gray = np.asarray(cv2.cvtColor(resized64, cv.CV_RGB2GRAY))
-            gray = np.asarray(cv2.cvtColor(resized, cv2.COLOR_RGB2GRAY))
 
             cv2.imshow('Capture', img)
-            cv2.waitKey(35)
-            frame = gray.reshape(-1, 11200)
+            frame = DataSet.process_frame(img, meta_dataset['shape'], (0, 0, 140, 80))
             res = sess.run(pred, feed_dict={x: frame})
             print(labels[tuple(res[0])])
 
@@ -105,4 +102,4 @@ def play_cnn(meta_dataset):
             if ch == 27:
                 break
 
-            cv2.destroyAllWindows()
+    cv2.destroyAllWindows()

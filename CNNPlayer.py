@@ -1,52 +1,11 @@
-import numpy as np
 import cv2
 import tensorflow as tf
+from os.path import join
 from DataSet import DataSet
+from CNNWrappers import player_conv_net as conv_net
 
 
-# Create some wrappers for simplicity
-def conv2d(x, W, b, strides=1):
-    # Conv2D wrapper, with bias and relu activation
-    x = tf.nn.conv2d(x, W, strides=[1, strides, strides, 1], padding='SAME')
-    x = tf.nn.bias_add(x, b)
-    return tf.nn.relu(x)
-
-
-def maxpool2d(x, k=2):
-    # MaxPool2D wrapper
-    return tf.nn.max_pool(x, ksize=[1, k, k, 1], strides=[1, k, k, 1],
-                          padding='SAME')
-
-
-# Create model
-def conv_net(x, weights, biases):
-    # Reshape input picture
-    # x = tf.reshape(x, shape=[-1, 172, 380, 1])
-    x = tf.reshape(x, shape=[-1, 140, 80, 1])
-
-    # Convolution Layer
-    conv1 = conv2d(x, weights['wc1'], biases['bc1'])
-    # Max Pooling (down-sampling)
-    conv1 = maxpool2d(conv1, k=2)
-
-    # Convolution Layer
-    conv2 = conv2d(conv1, weights['wc2'], biases['bc2'])
-    # Max Pooling (down-sampling)
-    conv2 = maxpool2d(conv2, k=2)
-
-    # Fully connected layer
-    # Reshape conv2 output to fit fully connected layer input
-    fc1 = tf.reshape(conv2, [-1, weights['wd1'].get_shape().as_list()[0]])
-    fc1 = tf.add(tf.matmul(fc1, weights['wd1']), biases['bd1'])
-    fc1 = tf.nn.relu(fc1)
-    # Apply Dropout
-
-    # Output, class prediction
-    out = tf.add(tf.matmul(fc1, weights['out']), biases['out'])
-    return tf.nn.softmax(out)
-
-
-def play_cnn(meta_dataset):
+def play_cnn(meta_dataset, output):
     n_input = meta_dataset['frame_pixels']
     n_classes = meta_dataset['n_classes']
 
@@ -79,13 +38,13 @@ def play_cnn(meta_dataset):
     # ----------------------------- Video capture
 
     # cap = cv2.VideoCapture(0)
-    cap = cv2.VideoCapture('Other/Classes/Carreteras/tunel/tunel.mp4')
+    cap = cv2.VideoCapture('Other/Classes/Carreteras/carretera/carretera.mp4')
 
     labels = {tuple(y): x for x, y in meta_dataset['labels'].items()}
 
     # Launch the graph
     with tf.Session() as sess:
-        saver.restore(sess, "Other/Output/model.ckpt")
+        saver.restore(sess, join(output, "model.ckpt"))
 
         while True:
             ret, img = cap.read()
@@ -93,8 +52,8 @@ def play_cnn(meta_dataset):
             # resized64 = cv2.resize(cropped, (128, 128), interpolation = cv2.INTER_AREA)
             # gray = np.asarray(cv2.cvtColor(resized64, cv.CV_RGB2GRAY))
 
+            frame = DataSet.process_frame(img, meta_dataset['shape'], (0, 0, 140, 80)).reshape([1, 11200])
             cv2.imshow('Capture', img)
-            frame = DataSet.process_frame(img, meta_dataset['shape'], (0, 0, 140, 80))
             res = sess.run(pred, feed_dict={x: frame})
             print(labels[tuple(res[0])])
 

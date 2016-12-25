@@ -1,5 +1,6 @@
 import tensorflow as tf
 from os.path import join
+from CNNWrappers import creator_conv_net as conv_net
 
 
 def create_cnn(data_set, learning_rate=0.001, training_iters=3000, batch_size=32, display_step=10, dropout=0.75,
@@ -10,45 +11,6 @@ def create_cnn(data_set, learning_rate=0.001, training_iters=3000, batch_size=32
     y = tf.placeholder(tf.float32, [None, data_set.get_number_of_classes()])
     # Dropout Tensor
     keep_prob = tf.placeholder(tf.float32)
-
-    # Create some wrappers for simplicity
-    def conv2d(layer, layer_weights, b, strides=1):
-        # Conv2D wrapper, with bias and relu activation
-        layer = tf.nn.conv2d(layer, layer_weights, strides=[1, strides, strides, 1], padding='SAME')
-        layer = tf.nn.bias_add(layer, b)
-        return tf.nn.relu(layer)
-
-    def maxpool2d(tensor, k=2):
-        # MaxPool2D wrapper
-        return tf.nn.max_pool(tensor, ksize=[1, k, k, 1], strides=[1, k, k, 1], padding='SAME')
-
-    # Create model
-    def conv_net(layer, layer_weights, layer_biases, layer_dropout):
-        # Reshape input picture
-        # x = tf.reshape(x, shape=[-1, 172, 380, 1])
-        layer = tf.reshape(layer, shape=[-1, 140, 80, 1])
-
-        # Convolution Layer
-        conv1 = conv2d(layer, layer_weights['wc1'], layer_biases['bc1'])
-        # Max Pooling (down-sampling)
-        conv1 = maxpool2d(conv1, k=2)
-
-        # Convolution Layer
-        conv2 = conv2d(conv1, layer_weights['wc2'], layer_biases['bc2'])
-        # Max Pooling (down-sampling)
-        conv2 = maxpool2d(conv2, k=2)
-
-        # Fully connected layer
-        # Reshape conv2 output to fit fully connected layer input
-        fc1 = tf.reshape(conv2, [-1, layer_weights['wd1'].get_shape().as_list()[0]])
-        fc1 = tf.add(tf.matmul(fc1, layer_weights['wd1']), layer_biases['bd1'])
-        fc1 = tf.nn.relu(fc1)
-        # Apply Dropout
-        fc1 = tf.nn.dropout(fc1, layer_dropout)
-
-        # Output, class prediction
-        out = tf.add(tf.matmul(fc1, layer_weights['out']), layer_biases['out'])
-        return out
 
     # Store layers weight & bias
     weights = {

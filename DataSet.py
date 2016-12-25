@@ -144,7 +144,7 @@ class DataSet:
 
     @staticmethod
     def image_base64_to_numpy(image):
-        return np.asarray(Image.open(BytesIO(base64.b64decode(image))))
+        return np.asarray((base64.b64decode(image)))
 
     def to_file(self, directory):
         if not os.path.exists(directory):
@@ -180,9 +180,7 @@ class DataSet:
 
     @staticmethod
     def image_numpy_to_base64(image):
-        cache = BytesIO()
-        image.save(cache, format="JPEG")
-        return base64.b64encode(cache.getvalue())
+        return base64.b64encode(image)
 
     def next_training_batch(self, size=10):
         self.training_index, result = self.next_batch(self.train, self.training_index, size)

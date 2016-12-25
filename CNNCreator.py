@@ -1,42 +1,15 @@
-"""
-A Convolutional Network implementation example using TensorFlow library.
-This example is using the MNIST database of handwritten digits
-(http://yann.lecun.com/exdb/mnist/)
-Author: Aymeric Damien
-Project: https://github.com/aymericdamien/TensorFlow-Examples/
-"""
-
 import tensorflow as tf
-import numpy as np
+from os.path import join
 
 
-def one_hot(label_list, n):
-    label_array = np.array(label_list).flatten()
-    o_h = np.zeros((len(label_array), n))
-    o_h[np.arange(len(label_array)), label_array - 1] = 1
-    return o_h
-
-
-def nn(data_set):
-    n_classes = data_set.get_number_of_classes()
-    classes = data_set.get_classes()
-    labels = one_hot(list(range(n_classes)), n_classes)
-
-    # Parameters
-    learning_rate = 0.001
-    training_iters = 3000
-    batch_size = 32
-    display_step = 10
-
-    # Network Parameters
-    n_input = data_set.frame_pixels()  # 380*172 # MNIST data input (img shape: 28*28)
-    # n_classes = 10 # MNIST total classes (0-9 digits)
-    dropout = 0.75  # Dropout, probability to keep units
-
-    # tf Graph input
-    x = tf.placeholder(tf.float32, [None, n_input])
-    y = tf.placeholder(tf.float32, [None, n_classes])
-    keep_prob = tf.placeholder(tf.float32)  # dropout (keep probability)
+def create_cnn(data_set, learning_rate=0.001, training_iters=3000, batch_size=32, display_step=10, dropout=0.75,
+               save_path='.'):
+    # Input layer
+    x = tf.placeholder(tf.float32, [None, data_set.frame_pixels()])
+    # Output layer
+    y = tf.placeholder(tf.float32, [None, data_set.get_number_of_classes()])
+    # Dropout Tensor
+    keep_prob = tf.placeholder(tf.float32)
 
     # Create some wrappers for simplicity
     def conv2d(layer, layer_weights, b, strides=1):
@@ -86,14 +59,14 @@ def nn(data_set):
         # fully connected, 7*7*64 inputs, 1024 outputs
         'wd1': tf.Variable(tf.random_normal([35 * 20 * 128, 256])),
         # 1024 inputs, 10 outputs (class prediction)
-        'out': tf.Variable(tf.random_normal([256, n_classes]))
+        'out': tf.Variable(tf.random_normal([256, data_set.get_number_of_classes()]))
     }
 
     biases = {
         'bc1': tf.Variable(tf.random_normal([64])),
         'bc2': tf.Variable(tf.random_normal([128])),
         'bd1': tf.Variable(tf.random_normal([256])),
-        'out': tf.Variable(tf.random_normal([n_classes]))
+        'out': tf.Variable(tf.random_normal([data_set.get_number_of_classes()]))
     }
 
     # Construct model
@@ -110,37 +83,34 @@ def nn(data_set):
     # Initializing the variables
     init = tf.global_variables_initializer()
 
-    # Add ops to save and restore all the variables.
-    saver = tf.train.Saver()
-
     # Launch the graph
     with tf.Session() as sess:
         sess.run(init)
         step = 1
         # Keep training until reach max iterations
         while step * batch_size < training_iters:
-            batch_x, batch_y = data_set.next_training_batch(batch_size)
-            batch_x = [labels[classes.index(l)] for l in batch_x]
-            batch_y = [array.flatten() for array in batch_y]
+            batch_labels, batch_frames = data_set.next_training_batch(batch_size)
+            batch_frames = list(map((lambda frame: frame.flatten()), batch_frames))
             # Run optimization op (backprop)
-            sess.run(optimizer, feed_dict={x: batch_y, y: batch_x, keep_prob: dropout})
+            sess.run(optimizer, feed_dict={x: batch_frames, y: batch_labels, keep_prob: dropout})
             if step % display_step == 0:
                 # Calculate batch loss and accuracy
-                loss, acc = sess.run([cost, accuracy], feed_dict={x: batch_y, y: batch_x, keep_prob: 1.})
+                loss, acc = sess.run([cost, accuracy], feed_dict={x: batch_frames, y: batch_labels, keep_prob: 1.})
                 print("Iter " + str(step * batch_size) + ", Minibatch Loss= " +
                       "{:.6f}".format(loss) + ", Training Accuracy= " +
                       "{:.5f}".format(acc))
+
+                if acc == 1:
+                    break
+
             step += 1
         print("Optimization Finished!")
 
         # Calculate accuracy for 245 OCT test images
+        for i in range(0, 244, batch_size):
+            batch_labels, batch_frames = data_set.next_test_batch(batch_size)
+            batch_frames = list(map((lambda frame: frame.flatten()), batch_frames))
+            print("Testing Accuracy:", sess.run(accuracy, feed_dict={x: batch_frames, y: batch_labels, keep_prob: 1.}))
 
-        for i in range(0, 244, 30):
-            batch_x, batch_y = data_set.next_test_batch(batch_size)
-            batch_x = [labels[classes.index(l)] for l in batch_x]
-            batch_y = [array.flatten() for array in batch_y]
-            print("Testing Accuracy:", sess.run(accuracy, feed_dict={x: batch_y, y: batch_x, keep_prob: 1.}))
-
-        # Save the variables to disk.
-        save_path = saver.save(sess, "./model.ckpt")
+        save_path = tf.train.Saver().save(sess, join(save_path, "model.ckpt"))
         print("Model saved in file: %s" % save_path)

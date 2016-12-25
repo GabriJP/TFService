@@ -4,9 +4,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from sys import argv, stderr
 
 from DataSet import DataSet
-from nn import nn
+from CNNCreator import create_cnn
 
-import Inception
 
 """
 Program usage:
@@ -72,4 +71,4 @@ data_set = DataSet.from_file(output)
 #     plt.xlabel(labels[p])
 # plt.show()
 
-Inception.nn(data_set)
+create_cnn(data_set, save_path=output)

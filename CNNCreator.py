@@ -62,17 +62,14 @@ def create_cnn(data_set, learning_rate=0.001, training_iters=3000, batch_size=32
                       "{:.6f}".format(loss) + ", Training Accuracy= " +
                       "{:.5f}".format(acc))
 
-                if acc == 1:
-                    break
-
             step += 1
         print("Optimization Finished!")
 
-        # Calculate accuracy for 245 OCT test images
         for i in range(0, 244, batch_size):
             batch_labels, batch_frames = data_set.next_test_batch(batch_size)
             batch_frames = list(map((lambda frame: frame.flatten()), batch_frames))
             print("Testing Accuracy:", sess.run(accuracy, feed_dict={x: batch_frames, y: batch_labels, keep_prob: 1.}))
 
-        save_path = tf.train.Saver().save(sess, join(save_path, "model.ckpt"))
+        save_path = tf.train.Saver().save(sess, join(save_path, "model"))
         print("Model saved in file: %s" % save_path)
+        sess.close()

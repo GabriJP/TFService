@@ -5,6 +5,12 @@ from DataSet import DataSet
 from CNNWrappers import player_conv_net as conv_net
 
 
+videos = {
+    'tunel': 'Other/Classes/Carreteras/tunel/tunel.mp4',
+    'carretera': 'Other/Classes/Carreteras/carretera/carretera.mp4',
+}
+
+
 def play_cnn(meta_dataset, output):
     n_input = meta_dataset['frame_pixels']
     n_classes = meta_dataset['n_classes']
@@ -38,13 +44,14 @@ def play_cnn(meta_dataset, output):
     # ----------------------------- Video capture
 
     # cap = cv2.VideoCapture(0)
-    cap = cv2.VideoCapture('Other/Classes/Carreteras/carretera/carretera.mp4')
+    cap = cv2.VideoCapture(videos['tunel'])
 
     labels = {tuple(y): x for x, y in meta_dataset['labels'].items()}
 
     # Launch the graph
     with tf.Session() as sess:
-        saver.restore(sess, join(output, "model.ckpt"))
+        new_saver = tf.train.import_meta_graph(join(output, 'model.meta'))
+        new_saver.restore(sess, tf.train.latest_checkpoint(output))
 
         while True:
             ret, img = cap.read()

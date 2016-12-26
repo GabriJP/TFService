@@ -111,8 +111,9 @@ class DataSet:
 
     @staticmethod
     def process_frame(frame, new_dimensions, crop_dimensions):
-        return np.asarray(
-            Image.fromarray(frame).convert('L').resize(new_dimensions, Image.ANTIALIAS).crop(crop_dimensions))
+        if frame is not None:
+            return np.asarray(
+                Image.fromarray(frame).convert('L').resize(new_dimensions, Image.ANTIALIAS).crop(crop_dimensions))
 
     @classmethod
     def from_file(cls, directory):
@@ -144,7 +145,7 @@ class DataSet:
 
     @staticmethod
     def image_base64_to_numpy(image):
-        return np.asarray((base64.b64decode(image)))
+        return np.asarray(Image.open(BytesIO(base64.b64decode(image))))
 
     def to_file(self, directory):
         if not os.path.exists(directory):
@@ -180,7 +181,9 @@ class DataSet:
 
     @staticmethod
     def image_numpy_to_base64(image):
-        return base64.b64encode(image)
+        cache = BytesIO()
+        Image.fromarray(image).save(cache, format="JPEG")
+        return base64.b64encode(cache.getvalue())
 
     def next_training_batch(self, size=10):
         self.training_index, result = self.next_batch(self.train, self.training_index, size)

@@ -60,9 +60,8 @@ if len(output) < 1:
 output = output[0]
 
 data_set = DataSet.from_directory(classes_root, resize, crop, train, test)
-for i in range(20):
-    data_set.to_file(output)
-    data_set = DataSet.from_file(output)
+data_set.to_file(output)
+data_set = DataSet.from_file(output)
 
 # labels, frames = data_set.next_test_batch(10)
 
@@ -75,4 +74,4 @@ for i in range(20):
 # plt.show()
 
 create_cnn(data_set, save_path=output)
-play_cnn(DataSet.get_meta(output), output)
+# play_cnn(DataSet.get_meta(output), output)

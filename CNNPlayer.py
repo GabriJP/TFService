@@ -1,9 +1,8 @@
 import cv2
 import tensorflow as tf
 from os.path import join
-from DataSet import DataSet
 from CNNWrappers import player_conv_net as conv_net
-
+import numpy as np
 
 videos = {
     'tunel': 'Other/Classes/Carreteras/tunel/tunel.mp4',
@@ -46,23 +45,20 @@ def play_cnn(meta_dataset, output):
     # cap = cv2.VideoCapture(0)
     cap = cv2.VideoCapture(videos['tunel'])
 
-    labels = {tuple(y): x for x, y in meta_dataset['labels'].items()}
-
+    saver = tf.train.Saver()
     # Launch the graph
     with tf.Session() as sess:
-        new_saver = tf.train.import_meta_graph(join(output, 'model.meta'))
-        new_saver.restore(sess, tf.train.latest_checkpoint(output))
+        saver.restore(sess, join(output, 'model'))
 
         while True:
             ret, img = cap.read()
-            # cropped = resized[0:180, 70:250]
-            # resized64 = cv2.resize(cropped, (128, 128), interpolation = cv2.INTER_AREA)
-            # gray = np.asarray(cv2.cvtColor(resized64, cv.CV_RGB2GRAY))
+            resized = cv2.resize(img, meta_dataset['shape'], interpolation=cv2.INTER_AREA)
+            gray = np.asarray(cv2.cvtColor(resized, cv2.COLOR_RGB2GRAY))
 
-            frame = DataSet.process_frame(img, meta_dataset['shape'], (0, 0, 140, 80)).reshape([1, 11200])
             cv2.imshow('Capture', img)
+            frame = gray.reshape(-1, 11200)
             res = sess.run(pred, feed_dict={x: frame})
-            print(labels[tuple(res[0])])
+            print(meta_dataset['labels'].get(tuple(res[0])))
 
             ch = 0xFF & cv2.waitKey(1)
             if ch == 27:

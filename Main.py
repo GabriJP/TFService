@@ -6,6 +6,7 @@ from sys import argv, stderr
 from DataSet import DataSet
 from CNNCreator import create_cnn
 from CNNPlayer import play_cnn
+import tensorflow as tf
 
 
 """
@@ -59,19 +60,16 @@ if len(output) < 1:
     exit(1)
 output = output[0]
 
+iterations = [arg[6:] for arg in argv if arg.startswith("iters=")]
+if len(iterations) < 1:
+    print("Not enough iters arguments", file=stderr)
+    exit(1)
+iterations = int(iterations[0])
+
 data_set = DataSet.from_directory(classes_root, resize, crop, train, test)
 data_set.to_file(output)
 data_set = DataSet.from_file(output)
 
-# labels, frames = data_set.next_test_batch(10)
-
-# from matplotlib import cm
-# from matplotlib import pyplot as plt
-# for p in range(10):
-#     plt.subplot(2, 5, p + 1)
-#     plt.imshow(frames[p], cmap=cm.Greys_r)
-#     plt.xlabel(labels[p])
-# plt.show()
-
-create_cnn(data_set, save_path=output)
-# play_cnn(DataSet.get_meta(output), output)
+create_cnn(data_set, save_path=output, training_iters=iterations)
+tf.reset_default_graph()
+play_cnn(data_set.get_metadata(), output)

@@ -3,28 +3,26 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import base64
 import gzip
-from collections import defaultdict
-
 import imageio
 import os
-
 import numpy as np
 import pickle as p
 
+from collections import defaultdict
 from multiprocessing.pool import ThreadPool
 from PIL import Image
 from sys import stderr
 from io import BytesIO
-from os.path import join, isfile
 from os import listdir
+from os.path import join, isfile
 
 pickled_dataset_filename = "dataset.dump"
 pickled_meta_dataset_filename = "meta_dataset.dump"
-pickle_protocol = 2
+pickle_protocol = -1
 
 
 class DataSet:
-    def __init__(self, train_set, test_set, validation_set, number_of_classes, shape, labels, train_pct=0.85,
+    def __init__(self, train_set, test_set, validation_set, number_of_classes, shape, crop, labels, train_pct=0.85,
                  test_pct=0.15):
 
         if train_pct + test_pct > 1:
@@ -34,6 +32,7 @@ class DataSet:
         self.validation = validation_set
         self.number_of_classes = number_of_classes
         self.shape = shape
+        self.crop = crop
         self.train_pct = train_pct
         self.test_pct = test_pct
         self.validation_pct = 1 - train_pct - test_pct
@@ -41,8 +40,6 @@ class DataSet:
         self.test_index = 0
         self.validation_index = 0
         self.labels = labels
-        labels = self.one_hot(list(range(number_of_classes)), number_of_classes)
-        self.labels = dict(zip(self.get_classes(), labels))
 
     @classmethod
     def from_directory(cls, root_directory, new_dimensions, crop_dimensions, train_pct, test_pct):
@@ -87,14 +84,15 @@ class DataSet:
 
         network_expected_outputs = cls.one_hot(list(range(number_of_classes)), number_of_classes)
         label_with_expected_output = dict(zip(label_set, network_expected_outputs))
+        inv_label_with_expected_output = {tuple(y): x for x, y in label_with_expected_output.items()}
 
         func = (lambda labelled_frame: (label_with_expected_output.get(labelled_frame[0]), labelled_frame[1]))
         train_set = list(map(func, train_set))
         test_set = list(map(func, test_set))
         validation_set = list(map(func, validation_set))
 
-        return cls(train_set, test_set, validation_set, number_of_classes, frames[0][1].shape,
-                   label_with_expected_output, train_pct, test_pct)
+        return cls(train_set, test_set, validation_set, number_of_classes, frames[0][1].shape, crop_dimensions,
+                   inv_label_with_expected_output, train_pct, test_pct)
 
     @classmethod
     def get_frames_from_video(cls, filename, new_dimensions, crop_dimensions):
@@ -112,7 +110,7 @@ class DataSet:
     @staticmethod
     def process_frame(frame, new_dimensions, crop_dimensions):
         if frame is not None:
-            return np.asarray(
+            return np.array(
                 Image.fromarray(frame).convert('L').resize(new_dimensions, Image.ANTIALIAS).crop(crop_dimensions))
 
     @classmethod
@@ -139,6 +137,7 @@ class DataSet:
                    validation_set,
                    meta_dictionary['n_classes'],
                    meta_dictionary['shape'],
+                   meta_dictionary['crop'],
                    meta_dictionary['labels'],
                    meta_dictionary['train_pct'],
                    meta_dictionary['test_pct'])
@@ -164,12 +163,7 @@ class DataSet:
                       'train_pct': self.train_pct,
                       'test_pct': self.test_pct}
 
-        meta_dictionary = {'n_classes': self.number_of_classes,
-                           'shape': self.shape,
-                           'labels': self.labels,
-                           'train_pct': self.train_pct,
-                           'test_pct': self.test_pct,
-                           'frame_pixels': self.frame_pixels()}
+        meta_dictionary = self.get_metadata()
 
         file = gzip.open(join(directory, pickled_dataset_filename), "wb")
         p.dump(dictionary, file, pickle_protocol)
@@ -226,6 +220,15 @@ class DataSet:
 
     def get_frame_dimensions(self):
         return self.shape
+
+    def get_metadata(self):
+        return {'n_classes': self.number_of_classes,
+                'shape': self.shape,
+                'crop': self.crop,
+                'labels': self.labels,
+                'train_pct': self.train_pct,
+                'test_pct': self.test_pct,
+                'frame_pixels': self.frame_pixels()}
 
     @staticmethod
     def get_meta(directory):

@@ -32,11 +32,12 @@ def create_cnn(data_set, learning_rate=0.001, training_iters=3000, batch_size=32
     }
 
     # Construct model
-    pred = conv_net(x, weights, biases, keep_prob)
+    pred = conv_net(x, weights, biases, keep_prob, data_set.get_frame_dimensions())
 
     # Define loss and optimizer
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(pred, y))
     optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
+
 
     # Evaluate model
     correct_pred = tf.equal(tf.argmax(pred, 1), tf.argmax(y, 1))

@@ -41,13 +41,13 @@ def player_conv_net(x, weights, biases):
     return tf.nn.softmax(out)
 
 
-def creator_conv_net(layer, layer_weights, layer_biases, layer_dropout):
+def creator_conv_net(input_layer, layer_weights, layer_biases, layer_dropout, frame_dimensions):
     # Reshape input picture
     # x = tf.reshape(x, shape=[-1, 172, 380, 1])
-    layer = tf.reshape(layer, shape=[-1, 140, 80, 1])
+    input_layer = tf.reshape(input_layer, shape=[-1, *frame_dimensions, 1])
 
     # Convolution Layer
-    conv1 = conv2d(layer, layer_weights['wc1'], layer_biases['bc1'])
+    conv1 = conv2d(input_layer, layer_weights['wc1'], layer_biases['bc1'])
     # Max Pooling (down-sampling)
     conv1 = maxpool2d(conv1, k=2)
 

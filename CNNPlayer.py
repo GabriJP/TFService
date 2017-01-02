@@ -38,14 +38,13 @@ def play_cnn(meta_dataset, output):
     saver = tf.train.Saver()
 
     # Construct model
-    pred = conv_net(x, weights, biases)
+    pred = conv_net(x, weights, biases, meta_dataset['shape'])
 
     # ----------------------------- Video capture
 
     # cap = cv2.VideoCapture(0)
-    cap = cv2.VideoCapture(videos['tunel'])
+    cap = cv2.VideoCapture(videos['carretera'])
 
-    saver = tf.train.Saver()
     # Launch the graph
     with tf.Session() as sess:
         saver.restore(sess, join(output, 'model'))
@@ -56,7 +55,7 @@ def play_cnn(meta_dataset, output):
             gray = np.asarray(cv2.cvtColor(resized, cv2.COLOR_RGB2GRAY))
 
             cv2.imshow('Capture', img)
-            frame = gray.reshape(-1, 11200)
+            frame = gray.reshape(-1, meta_dataset['shape'][0] * meta_dataset['shape'][1])
             res = sess.run(pred, feed_dict={x: frame})
             print(meta_dataset['labels'].get(tuple(res[0])))
 

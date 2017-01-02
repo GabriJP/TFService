@@ -3,8 +3,7 @@ from os.path import join
 from CNNWrappers import creator_conv_net as conv_net
 
 
-def create_cnn(data_set, learning_rate=0.001, training_iters=3000, batch_size=32, display_step=10, dropout=0.75,
-               save_path='.'):
+def create_cnn(data_set, save_path, training_iters, learning_rate=0.001, batch_size=32, display_step=10, dropout=0.75):
     # Input layer
     x = tf.placeholder(tf.float32, [None, data_set.frame_pixels()])
     # Output layer

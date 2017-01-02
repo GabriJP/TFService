@@ -14,10 +14,10 @@ def conv2d(x, W, b, strides=1):
     return tf.nn.relu(x)
 
 
-def player_conv_net(x, weights, biases):
+def player_conv_net(x, weights, biases, frame_dimensions):
     # Reshape input picture
     # x = tf.reshape(x, shape=[-1, 172, 380, 1])
-    x = tf.reshape(x, shape=[-1, 140, 80, 1])
+    x = tf.reshape(x, shape=[-1, frame_dimensions[0], frame_dimensions[1], 1])
 
     # Convolution Layer
     conv1 = conv2d(x, weights['wc1'], biases['bc1'])
@@ -44,7 +44,7 @@ def player_conv_net(x, weights, biases):
 def creator_conv_net(input_layer, layer_weights, layer_biases, layer_dropout, frame_dimensions):
     # Reshape input picture
     # x = tf.reshape(x, shape=[-1, 172, 380, 1])
-    input_layer = tf.reshape(input_layer, shape=[-1, *frame_dimensions, 1])
+    input_layer = tf.reshape(input_layer, shape=[-1, frame_dimensions[0], frame_dimensions[1], 1])
 
     # Convolution Layer
     conv1 = conv2d(input_layer, layer_weights['wc1'], layer_biases['bc1'])

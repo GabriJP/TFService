@@ -1,13 +1,13 @@
 # coding=utf-8
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from sys import argv, stderr
-
+from sys import stderr
 from DataSet import DataSet
 from CNNCreator import create_cnn
 from CNNPlayer import play_cnn
-import tensorflow as tf
 
+import argparse
+import tensorflow as tf
 
 """
 Program usage:
@@ -15,61 +15,44 @@ python ProgramName.py classes=directory resize='width'x'height' crop=x_from:y_fr
 train=percentage_for_training val=percentage_for_validation test=percentage_for_validation out=output_file
 
 Example:
-python Main.py classes=Other/Classes/Carreteras resize=140x80 crop=0:0:140:80 train=0.8 val=0 test=0.2 out=Other/Output/
+-r 0.75 -e 0.25 -i 3000 Other/Classes/Carreteras 140x80 0:0:140:80 Other/Output/
 """
 
-classes_root = [arg[8:] for arg in argv if arg.startswith("classes=")]
-if len(classes_root) < 1:
-    print("Not enough class arguments", file=stderr)
-    exit(1)
-classes_root = classes_root[0]
+parser = argparse.ArgumentParser()
+parser.add_argument("directory", help="Directory where to find the directories of classes with videos.")
+parser.add_argument("resize", help="Resize frames to this. 140x80.")
+parser.add_argument("crop", help="Crop resized frames to this. 0:0:140:80 (Left:Up:Right:Bottom).")
+parser.add_argument("output", help="Directory where to save the dataset and the network data.")
+parser.add_argument("-r", "--train_p", type=float, help="Percentage of frames to use in the training process. 0.8.",
+                    default=0.8)
+parser.add_argument("-e", "--test_p", type=float, help="Percentage of frames to use in the testing process. 0.2.",
+                    default=0.2)
+parser.add_argument("-i", "--iterations", type=int,
+                    help="Number of frames presented to the net in the training process. 3000.", default=3000)
+args = parser.parse_args()
 
-resize = [arg[7:] for arg in argv if arg.startswith("resize=")]
-if len(resize) < 1:
-    print("Not enough resize arguments", file=stderr)
+classes_root = args.directory
+resize = tuple(map(int, args.resize.split("x")))
+crop = tuple(map(int, args.crop.split(":")))
+output = args.output
+train = args.train_p
+if not 0 <= train <= 1:
+    print("Train percentage must be between 0 and 1.", file=stderr)
     exit(1)
-resize = tuple(map(int, resize[0].split("x")))
-
-crop = [arg[5:] for arg in argv if arg.startswith("crop=")]
-if len(crop) < 1:
-    print("Not enough crop arguments", file=stderr)
+test = args.test_p
+if not 0 <= test <= 1:
+    print("Test percentage must be between 0 and 1.", file=stderr)
     exit(1)
-crop = tuple(map(int, crop[0].split(":")))
-
-train = [arg[6:] for arg in argv if arg.startswith("train=")]
-if len(train) < 1:
-    print("Not enough train arguments", file=stderr)
+if not 0 <= test + train <= 1:
+    print("Test + train percentages must be between 0 and 1.", file=stderr)
     exit(1)
-train = float(train[0])
+validation = 1 - train - test
+iterations = args.iterations
 
-test = [arg[5:] for arg in argv if arg.startswith("test=")]
-if len(test) < 1:
-    print("Not enough test arguments", file=stderr)
-    exit(1)
-test = float(test[0])
-
-validation = [arg[4:] for arg in argv if arg.startswith("val=")]
-if len(validation) < 1:
-    print("Not enough val arguments", file=stderr)
-    exit(1)
-validation = float(validation[0])
-
-output = [arg[4:] for arg in argv if arg.startswith("out=")]
-if len(output) < 1:
-    print("Not enough out arguments", file=stderr)
-    exit(1)
-output = output[0]
-
-iterations = [arg[6:] for arg in argv if arg.startswith("iters=")]
-if len(iterations) < 1:
-    print("Not enough iters arguments", file=stderr)
-    exit(1)
-iterations = int(iterations[0])
-
-data_set = DataSet.from_directory(classes_root, resize, crop, train, test)
-data_set.to_file(output)
+# data_set = DataSet.from_directory(classes_root, resize, crop, train, test)
+# data_set.to_file(output)
 data_set = DataSet.from_file(output)
 
-create_cnn(data_set, save_path=output, training_iters=iterations)
-tf.reset_default_graph()
+# create_cnn(data_set, output, iterations)
+# tf.reset_default_graph()
 play_cnn(data_set.get_metadata(), output)

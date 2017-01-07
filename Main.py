@@ -9,10 +9,10 @@ import argparse
 
 """
 Example:
--r 0.75 -e 0.25 -i 3000 Other/Classes/Carreteras 140x80 0:0:140:80 Other/Output/
+-r 0.75 -e 0.25 -i 3000 -c Other/Classes/Carreteras -p Other/Classes/Carreteras/tunel/tunel.mp4 140x80 0:0:140:80 Other/Output/
 """
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(prog="TFService", description="Process videos and train a CNN with their frames")
 parser.add_argument("resize", help="Resize frames to this. 140x80.")
 parser.add_argument("crop", help="Crop resized frames to this. 0:0:140:80 (Left:Up:Right:Bottom).")
 parser.add_argument("output", help="Directory where to save the dataset and the network data.")

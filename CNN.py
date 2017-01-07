@@ -3,6 +3,7 @@ import tensorflow as tf
 import numpy as np
 
 from os.path import join
+from math import ceil
 
 
 def maxpool2d(x, k=2):
@@ -56,7 +57,7 @@ def create_cnn(data_set, save_path, training_iters, learning_rate=0.001, batch_s
     keep_prob = tf.placeholder(tf.float32)
 
     # Store layers weight & bias
-    weights, biases = get_weights_and_biases(data_set.get_number_of_classes())
+    weights, biases = get_weights_and_biases(data_set.get_number_of_classes(), data_set.get_frame_dimensions())
 
     # Construct model
     pred = conv_net(x, weights, biases, data_set.get_frame_dimensions(), keep_prob)
@@ -111,7 +112,7 @@ def play_cnn(meta_dataset, output, video):
 
     x = tf.placeholder(tf.float32, [None, n_input])
     # Store layers weight & bias
-    weights, biases = get_weights_and_biases(n_classes)
+    weights, biases = get_weights_and_biases(n_classes, meta_dataset['shape'])
 
     # Add ops to save and restore all the variables.
     saver = tf.train.Saver()
@@ -123,7 +124,8 @@ def play_cnn(meta_dataset, output, video):
 
     # cap = cv2.VideoCapture(0)
     cap = cv2.VideoCapture(video)
-
+    crop = meta_dataset['crop']
+    shape = tuple(map(sum, zip(reversed(meta_dataset['shape']), crop)))
     # Launch the graph
     with tf.Session() as sess:
         saver.restore(sess, join(output, 'model'))
@@ -132,15 +134,16 @@ def play_cnn(meta_dataset, output, video):
             ret, img = cap.read()
             if img is None:
                 break
-            resized = cv2.resize(img, meta_dataset['shape'], interpolation=cv2.INTER_AREA)
+
+            resized = cv2.resize(img, shape, interpolation=cv2.INTER_AREA)[crop[1]:, crop[0]:]
             gray = np.asarray(cv2.cvtColor(resized, cv2.COLOR_RGB2GRAY))
 
-            cv2.imshow('Capture', img)
-            frame = gray.reshape(-1, meta_dataset['shape'][0] * meta_dataset['shape'][1])
+            cv2.imshow('Capture', resized)
+            frame = gray.reshape(-1, (crop[3]-crop[1]) * (crop[2]-crop[0]))
             res = sess.run(pred, feed_dict={x: frame})
             print(meta_dataset['labels'].get(tuple(res[0])))
 
-            ch = 0xFF & cv2.waitKey(1)
+            ch = 0xFF & cv2.waitKey(10)
             if ch == 27:
                 break
 
@@ -148,14 +151,13 @@ def play_cnn(meta_dataset, output, video):
     tf.reset_default_graph()
 
 
-def get_weights_and_biases(n_classes):
+def get_weights_and_biases(n_classes, shape):
     return {
                # 5x5 conv, 1 input, 32 outputs
                'wc1': tf.Variable(tf.random_normal([5, 5, 1, 64])),
                # 5x5 conv, 32 inputs, 64 outputs
                'wc2': tf.Variable(tf.random_normal([5, 5, 64, 128])),
-               # fully connected, 7*7*64 inputs, 1024 outputs
-               'wd1': tf.Variable(tf.random_normal([35 * 20 * 128, 256])),
+               'wd1': tf.Variable(tf.random_normal([int(ceil(shape[0] / 4)) * int(ceil(shape[1] / 4)) * 128, 256])),
                # 1024 inputs, 10 outputs (class prediction)
                'out': tf.Variable(tf.random_normal([256, n_classes]))
            }, {
@@ -164,3 +166,10 @@ def get_weights_and_biases(n_classes):
                'bd1': tf.Variable(tf.random_normal([256])),
                'out': tf.Variable(tf.random_normal([n_classes]))
            }
+
+
+def multiply(elements):
+    result = 1
+    for element in elements:
+        result *= element
+    return result

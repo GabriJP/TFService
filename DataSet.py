@@ -49,7 +49,7 @@ class DataSet:
         videos = defaultdict(dict)
 
         for label, directory in directories.items():
-            files = [join(directory, file) for file in listdir(directory) if isfile(join(directory, file))]
+            files = [join(directory, content) for content in listdir(directory) if isfile(join(directory, content))]
             videos[label] = files
 
         return cls.from_videos(videos.items(), new_dimensions, crop_dimensions, train_pct, test_pct)
@@ -75,11 +75,11 @@ class DataSet:
         number_of_classes = len(set(list(zip(*label_videos))[0]))
 
         label_set = set()
-        for label, frame in train_set:
+        for label, _ in train_set:
             label_set.add(label)
-        for label, frame in test_set:
+        for label, _ in test_set:
             label_set.add(label)
-        for label, frame in validation_set:
+        for label, _ in validation_set:
             label_set.add(label)
 
         network_expected_outputs = cls.one_hot(list(range(number_of_classes)), number_of_classes)
@@ -118,13 +118,13 @@ class DataSet:
         if not os.access(join(directory, pickled_dataset_filename), os.F_OK):
             raise IOError("Dataset file not found")
 
-        file = gzip.open(join(directory, pickled_dataset_filename), "rb")
-        dictionary = p.load(file)
-        file.close()
+        gzfile = gzip.open(join(directory, pickled_dataset_filename), "rb")
+        dictionary = p.load(gzfile)
+        gzfile.close()
 
-        file = gzip.open(join(directory, pickled_meta_dataset_filename), "rb")
-        meta_dictionary = p.load(file)
-        file.close()
+        gzfile = gzip.open(join(directory, pickled_meta_dataset_filename), "rb")
+        meta_dictionary = p.load(gzfile)
+        gzfile.close()
 
         func = (lambda y: list(map((lambda x: (x[0], cls.image_base64_to_numpy(x[1]))), y)))
 
@@ -165,13 +165,13 @@ class DataSet:
 
         meta_dictionary = self.get_metadata()
 
-        file = gzip.open(join(directory, pickled_dataset_filename), "wb")
-        p.dump(dictionary, file, pickle_protocol)
-        file.close()
+        gzfile = gzip.open(join(directory, pickled_dataset_filename), "wb")
+        p.dump(dictionary, gzfile, pickle_protocol)
+        gzfile.close()
 
-        file = gzip.open(join(directory, pickled_meta_dataset_filename), "wb")
-        p.dump(meta_dictionary, file, pickle_protocol)
-        file.close()
+        gzfile = gzip.open(join(directory, pickled_meta_dataset_filename), "wb")
+        p.dump(meta_dictionary, gzfile, pickle_protocol)
+        gzfile.close()
 
     @staticmethod
     def image_numpy_to_base64(image):
@@ -200,11 +200,11 @@ class DataSet:
 
     def get_frames_per_label(self):
         result = defaultdict(int)
-        for label, frame in self.train:
+        for label, _ in self.train:
             result[label] += 1
-        for label, frame in self.test:
+        for label, _ in self.test:
             result[label] += 1
-        for label, frame in self.validation:
+        for label, _ in self.validation:
             result[label] += 1
 
         return result
@@ -236,9 +236,9 @@ class DataSet:
                 or not os.access(join(directory, pickled_meta_dataset_filename), os.F_OK):
             raise IOError("Dataset file not found")
 
-        file = gzip.open(join(directory, pickled_meta_dataset_filename), "rb")
-        meta_dictionary = p.load(file)
-        file.close()
+        gzfile = gzip.open(join(directory, pickled_meta_dataset_filename), "rb")
+        meta_dictionary = p.load(gzfile)
+        gzfile.close()
 
         return meta_dictionary
 

@@ -9,46 +9,51 @@ import argparse
 
 """
 Example:
--r 0.75 -e 0.25 -i 3000 -c Other/Classes/Carreteras -p Other/Classes/Carreteras/tunel/tunel.mp4 140x80 0:0:140:80 Other/Output/
+-d Other/Classes/Carreteras 140x80 0:0:140:80 0.75 0.25 -n 2000 -p Other/Classes/Carreteras/tunel/tunel.mp4 Other/Output
 """
 
 parser = argparse.ArgumentParser(prog="TFService", description="Process videos and train a CNN with their frames")
-parser.add_argument("resize", help="Resize frames to this. 140x80.")
-parser.add_argument("crop", help="Crop resized frames to this. 0:0:140:80 (Left:Up:Right:Bottom).")
-parser.add_argument("output", help="Directory where to save the dataset and the network data.")
-parser.add_argument("-r", "--train_p", type=float, help="Percentage of frames to use in the training process. 0.8.",
-                    default=0.8)
-parser.add_argument("-e", "--test_p", type=float, help="Percentage of frames to use in the testing process. 0.2.",
-                    default=0.2)
-parser.add_argument("-i", "--iterations", type=int,
-                    help="Number of frames presented to the net in the training process. 3000.", default=3000)
-parser.add_argument("-c", "--create", help="Directory where to find the directories of classes with videos.")
+parser.add_argument("-d", "--dataset", nargs=5,
+                    help="Create a new dataset. Takes 5 arguments: "
+                         "[Directory with classes: Other/Classes/Carreteras] "
+                         "[Resize dimensions: 140x80] "
+                         "[Crop dimensions Left,Top,Right,Bottom: 0:0:140:80] "
+                         "[Percentage of frames used for training: 0.75] "
+                         "[Percentage of frames used for testing: 0.15]")
+
+parser.add_argument("-n", "--network", type=int, help="Create a CNN with this many iterations")
 parser.add_argument("-p", "--play", help="Use this video to play the loaded CNN")
+parser.add_argument("output", help="Directory where to save and load the generated data.")
+
 args = parser.parse_args()
 
-classes_root = args.create
-resize = tuple(map(int, args.resize.split("x")))
-crop = tuple(map(int, args.crop.split(":")))
-output = args.output
-train = args.train_p
-if not 0 <= train <= 1:
-    print("Train percentage must be between 0 and 1.", file=stderr)
-    exit(1)
-test = args.test_p
-if not 0 <= test <= 1:
-    print("Test percentage must be between 0 and 1.", file=stderr)
-    exit(1)
-if not 0 <= test + train <= 1:
-    print("Test + train percentages must be between 0 and 1.", file=stderr)
-    exit(1)
-validation = 1 - train - test
-iterations = args.iterations
+data_set = None
 
-if classes_root:
+if args.dataset:
+    classes_root = args.dataset[0]
+    resize = tuple(map(int, args.dataset[1].split("x")))
+    crop = tuple(map(int, args.dataset[2].split(":")))
+    train = float(args.dataset[3])
+    if not 0 <= train <= 1:
+        print("Train percentage must be between 0 and 1.", file=stderr)
+        exit(1)
+    test = float(args.dataset[4])
+    if not 0 <= test <= 1:
+        print("Test percentage must be between 0 and 1.", file=stderr)
+        exit(1)
+    if not 0 <= test + train <= 1:
+        print("Test + train percentages must be between 0 and 1.", file=stderr)
+        exit(1)
+    validation = 1 - train - test
+
     data_set = DataSet.from_directory(classes_root, resize, crop, train, test)
-    data_set.to_file(output)
-    create_cnn(data_set, output, iterations)
+    data_set.to_file(args.output)
+
+if args.network:
+    if not data_set:
+        data_set = DataSet.from_file(args.output)
+    create_cnn(data_set, args.output, args.network)
 
 if args.play:
-    data_set = DataSet.from_file(output)
-    play_cnn(data_set.get_metadata(), output, args.play)
+    meta = data_set.get_metadata() if data_set else DataSet.get_meta(args.output)
+    play_cnn(meta, args.output, args.play)

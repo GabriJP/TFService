@@ -80,8 +80,7 @@ def create_cnn(data_set, save_path, training_iters, learning_rate=0.001, batch_s
         # Keep training until reach max iterations
         while step * batch_size < training_iters:
             batch_labels, batch_frames = data_set.next_training_batch(batch_size)
-            # batch_frames = list(map((lambda frame: frame.flatten()), batch_frames))
-            batch_frames = [array.flatten() for array in batch_frames]
+            batch_frames = list(map((lambda frame: frame.flatten()), batch_frames))
             # Run optimization op (backprop)
             sess.run(optimizer, feed_dict={x: batch_frames, y: batch_labels, keep_prob: dropout})
             if step % display_step == 0:
